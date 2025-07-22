@@ -1,6 +1,6 @@
 export interface Interaction {
   id: string
-  type: "email" | "chat" | "document" | "chatbot" | "call"
+  type: "email" | "chat" | "document" | "chatbot" | "call" | "document-creation" // Added new type
   title: string
   fullContext: string
   timestamp: string
@@ -70,9 +70,9 @@ export const mockAssessment: Assessment = {
           interactions: [
             {
               id: "interaction-3",
-              type: "document",
+              type: "document-creation", // Changed type to document-creation
               title: "Interaksi Membuat Dokumen: Laporan Analisis Efisiensi Biaya",
-              timestamp: "5 Juli 2025, 09:00", // Updated
+              timestamp: "5 Juli 2025, 09:00",
               participants: ["John Doe"],
               activityType: "Report Writing",
               contextTitle: "Laporan Analisis Efisiensi Biaya",
@@ -88,14 +88,14 @@ Berdasarkan analisis data operasional selama 6 bulan terakhir, ditemukan bahwa o
 
 ANALISIS DETAIL
 1. Proses Manual Saat Ini
-   - Waktu pemrosesan: 4 jam per transaksi
-   - Tingkat error: 3.2%
-   - Biaya tenaga kerja: Rp 500,000 per transaksi
+ - Waktu pemrosesan: 4 jam per transaksi
+ - Tingkat error: 3.2%
+ - Biaya tenaga kerja: Rp 500,000 per transaksi
 
 2. Proyeksi Otomatisasi
-   - Waktu pemrosesan: 30 menit per transaksi
-   - Tingkat error: 0.1%
-   - Biaya sistem: Rp 50,000 per transaksi
+ - Waktu pemrosesan: 30 menit per transaksi
+ - Tingkat error: 0.1%
+ - Biaya sistem: Rp 50,000 per transaksi
 
 REKOMENDASI
 1. Implementasi sistem otomatisasi dalam 3 fase
@@ -234,26 +234,36 @@ Baik, saya akan koordinasikan dengan tim teknis untuk penanganan darurat. Terima
               participants: ["John Doe"],
               activityType: "Document Review",
               contextTitle: "Review Laporan Keuangan Q2 2025",
-              fullContext: `DOCUMENT INTERACTION LOG
-Dokumen: "Laporan Keuangan Q2 2025.pdf"
-User: John Doe
-Tanggal: 8 Juli 2025
+              fullContext: `DOCUMENT_TITLE: Laporan Keuangan Q2 2025.pdf
+DOCUMENT_OPENED: 8 Juli 2025, 09:00
+DOCUMENT_CLOSED: 8 Juli 2025, 09:10
+TOTAL_READING_TIME: 10 menit
 
-09:00 - Dokumen dibuka
-09:01 - User membaca Executive Summary (1 menit)
-09:02 - User highlight: "Revenue growth 12% YoY, exceeding target by 3%"
-09:03 - User scroll ke bagian "Departmental Performance Analysis" 
-09:04 - User highlight: "Marketing ROI improved from 3.2x to 4.1x"
-09:05 - User highlight: "Operations cost reduced by 8% through automation"
-09:06 - User membaca "Market Expansion Analysis" section (1 minute)
-09:07 - User highlight: "Southeast Asia market shows 25% growth potential"
-09:08 - User highlight: "Competitor analysis indicates market share opportunity in B2B segment"
-09:09 - User scroll ke "Risk Assessment" section
-09:10 - Dokumen ditutup
+DOCUMENT_CONTENT:
+EXECUTIVE SUMMARY
+Kuartal kedua tahun 2025 menunjukkan pertumbuhan yang solid dengan peningkatan pendapatan sebesar 12% year-over-year.
 
-Total waktu membaca: 10 menit
-Total highlights: 5 sections
-Fokus utama: Revenue analysis, market expansion, risk assessment`,
+KINERJA KEUANGAN
+[HIGHLIGHTED]Revenue growth 12% YoY, exceeding target by 3%[/HIGHLIGHTED]
+
+Total pendapatan mencapai Rp 45.2 miliar, melampaui target sebesar Rp 43.8 miliar.
+
+ANALISIS KINERJA DEPARTEMEN
+Departemen Marketing menunjukkan peningkatan signifikan dalam efisiensi kampanye.
+[HIGHLIGHTED]Marketing ROI improved from 3.2x to 4.1x[/HIGHLIGHTED]
+
+Departemen Operations berhasil mengoptimalkan biaya operasional melalui inisiatif otomatisasi.
+[HIGHLIGHTED]Operations cost reduced by 8% through automation[/HIGHLIGHTED]
+
+ANALISIS EKSPANSI PASAR
+Riset pasar menunjukkan potensi pertumbuhan yang menjanjikan di kawasan Asia Tenggara.
+[HIGHLIGHTED]Southeast Asia market shows 25% growth potential[/HIGHLIGHTED]
+
+Analisis kompetitor mengindikasikan adanya peluang untuk memperluas pangsa pasar di segmen B2B.
+[HIGHLIGHTED]Competitor analysis indicates market share opportunity in B2B segment[/HIGHLIGHTED]
+
+PENILAIAN RISIKO
+Identifikasi risiko potensial dan strategi mitigasi untuk kuartal mendatang telah disiapkan dengan komprehensif.`,
             },
             {
               id: "interaction-7",

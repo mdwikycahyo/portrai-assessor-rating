@@ -21,6 +21,8 @@ export function ContextModal({ evidence, isOpen, onClose }: ContextModalProps) {
         return <MessageCircle size={20} className="text-green-600" />
       case "document":
         return <FileText size={20} className="text-purple-600" />
+      case "document-creation": // New type
+        return <FileText size={20} className="text-gray-600" /> // Using gray for document creation
       case "chatbot":
         return <Bot size={20} className="text-orange-600" />
       case "call":
@@ -38,6 +40,8 @@ export function ContextModal({ evidence, isOpen, onClose }: ContextModalProps) {
         return "green"
       case "document":
         return "purple"
+      case "document-creation": // New type
+        return "gray" // Using gray for document creation
       case "chatbot":
         return "orange"
       case "call":
@@ -164,14 +168,118 @@ export function ContextModal({ evidence, isOpen, onClose }: ContextModalProps) {
     </div>
   )
 
-  const renderDocumentInterface = () => (
-    <div className="bg-white rounded-lg border border-gray-200">
-      <div className="bg-purple-50 p-4 border-b border-purple-200">
-        <div className="flex items-center gap-3 mb-2">
-          <FileText size={20} className="text-purple-600" />
-          <h3 className="font-semibold text-purple-900">{evidence.contextTitle}</h3>
+  const renderDocumentInterface = () => {
+    // Parse document data
+    const lines = evidence.fullContext.split("\n")
+    const documentTitle =
+      lines.find((line) => line.startsWith("DOCUMENT_TITLE:"))?.replace("DOCUMENT_TITLE: ", "") || evidence.contextTitle
+    const documentOpened = lines.find((line) => line.startsWith("DOCUMENT_OPENED:"))?.replace("DOCUMENT_OPENED: ", "")
+    const documentClosed = lines.find((line) => line.startsWith("DOCUMENT_CLOSED:"))?.replace("DOCUMENT_CLOSED: ", "")
+    const readingTime = lines
+      .find((line) => line.startsWith("TOTAL_READING_TIME:"))
+      ?.replace("TOTAL_READING_TIME: ", "")
+
+    // Extract document content (everything after DOCUMENT_CONTENT:)
+    const contentStartIndex = lines.findIndex((line) => line.trim() === "DOCUMENT_CONTENT:")
+    const documentContent =
+      contentStartIndex !== -1 ? lines.slice(contentStartIndex + 1).join("\n") : evidence.fullContext
+
+    return (
+      <div className="bg-white rounded-lg border border-gray-200">
+        <div className="bg-purple-50 p-4 border-b border-purple-200">
+          <div className="flex items-center gap-3 mb-2">
+            <FileText size={20} className="text-purple-600" />
+            <h3 className="font-semibold text-purple-900">{documentTitle}</h3>
+          </div>
+          <div className="grid grid-cols-1 gap-2 text-sm text-purple-700">
+            {documentOpened && (
+              <div className="flex items-center gap-1">
+                <Clock size={14} />
+                <span>Dibuka: {documentOpened}</span>
+              </div>
+            )}
+            {documentClosed && (
+              <div className="flex items-center gap-1">
+                <Clock size={14} />
+                <span>Ditutup: {documentClosed}</span>
+              </div>
+            )}
+            {readingTime && (
+              <div className="flex items-center gap-1">
+                <Users size={14} />
+                <span>Durasi Membaca: {readingTime}</span>
+              </div>
+            )}
+          </div>
         </div>
-        <div className="flex items-center gap-4 text-sm text-purple-700">
+
+        <div className="p-6 max-h-96 overflow-y-auto bg-white">
+          <div className="prose prose-sm max-w-none">
+            {documentContent.split("\n").map((line, index) => {
+              if (line.trim() === "") {
+                return <div key={index} className="h-4" />
+              } else if (line.includes("[HIGHLIGHTED]") && line.includes("[/HIGHLIGHTED]")) {
+                // Handle highlighted text
+                const parts = line.split(/(\[HIGHLIGHTED\].*?\[\/HIGHLIGHTED\])/)
+                return (
+                  <p key={index} className="text-gray-800 mb-3 leading-relaxed">
+                    {parts.map((part, partIndex) => {
+                      if (part.startsWith("[HIGHLIGHTED]") && part.endsWith("[/HIGHLIGHTED]")) {
+                        const highlightedText = part.replace("[HIGHLIGHTED]", "").replace("[/HIGHLIGHTED]", "")
+                        return (
+                          <span key={partIndex} className="bg-yellow-200 px-1 py-0.5 rounded font-medium">
+                            {highlightedText}
+                          </span>
+                        )
+                      }
+                      return part
+                    })}
+                  </p>
+                )
+              } else if (line.match(/^[A-Z\s]+$/) && line.length > 3) {
+                // Headers (all caps, longer than 3 chars)
+                return (
+                  <h3 key={index} className="text-lg font-bold text-purple-900 mt-6 mb-3 first:mt-0">
+                    {line}
+                  </h3>
+                )
+              } else if (line.match(/^\d+\./)) {
+                // Numbered lists
+                return (
+                  <div key={index} className="ml-4 mb-2 text-gray-800">
+                    {line}
+                  </div>
+                )
+              } else if (line.includes(":") && !line.startsWith("   ")) {
+                // Key-value pairs or subheadings (not indented)
+                return (
+                  <div key={index} className="font-medium text-gray-900 mt-4 mb-2">
+                    {line}
+                  </div>
+                )
+              } else {
+                // Regular text
+                return (
+                  <p key={index} className="text-gray-800 mb-3 leading-relaxed">
+                    {line}
+                  </p>
+                )
+              }
+            })}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const renderDocumentCreationInterface = () => (
+    <div className="bg-white rounded-lg border border-gray-200">
+      <div className="bg-gray-50 p-4 border-b border-gray-200">
+        <div className="flex items-center gap-3 mb-2">
+          <FileText size={20} className="text-gray-600" />
+          <h3 className="font-semibold text-gray-900">{evidence.contextTitle}</h3>
+        </div>
+        <div className="flex items-center gap-4 text-sm text-gray-700">
           <div className="flex items-center gap-1">
             <Clock size={14} />
             <span>{evidence.timestamp}</span>
@@ -191,7 +299,7 @@ export function ContextModal({ evidence, isOpen, onClose }: ContextModalProps) {
             } else if (line.match(/^[A-Z\s]+$/)) {
               // Headers (all caps)
               return (
-                <h3 key={index} className="text-lg font-bold text-purple-900 mt-6 mb-3 first:mt-0">
+                <h3 key={index} className="text-lg font-bold text-gray-900 mt-6 mb-3 first:mt-0">
                   {line}
                 </h3>
               )
@@ -370,6 +478,8 @@ export function ContextModal({ evidence, isOpen, onClose }: ContextModalProps) {
         return renderChatInterface()
       case "document":
         return renderDocumentInterface()
+      case "document-creation": // New case for document creation
+        return renderDocumentCreationInterface()
       case "chatbot":
         return renderChatbotInterface()
       case "call":
