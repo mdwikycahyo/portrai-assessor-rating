@@ -490,7 +490,7 @@ export function InteractionDetailPanel({ evidence, onClose }: InteractionDetailP
 
   return (
     <div className="h-full flex flex-col bg-white border border-gray-200 rounded-lg mr-4">
-      {/* Panel Header p-6 bg-white border border-gray-200 rounded-lg h-full overflow-y-auto */}
+      {/* Panel Header */}
       <div className={`flex items-center justify-between p-4 border-b bg-${sourceColor}-50 border-${sourceColor}-200`}>
         <div className="flex items-center gap-3">
           {getSourceIcon()}
@@ -510,7 +510,9 @@ export function InteractionDetailPanel({ evidence, onClose }: InteractionDetailP
       </div>
 
       {/* Panel Content */}
-      <div className="p-4">{renderContent()}</div>
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-4">{renderContent()}</div>
+      </div>
     </div>
   )
 }

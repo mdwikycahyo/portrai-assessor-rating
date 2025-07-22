@@ -1,7 +1,20 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import { ChevronDown, ChevronUp, Sparkles, ChevronLeft, Save } from "lucide-react"
+import {
+  ChevronDown,
+  ChevronUp,
+  Sparkles,
+  ChevronLeft,
+  Save,
+  Mail,
+  MessageCircle,
+  FileText,
+  Bot,
+  Phone,
+  Clock,
+  Users,
+} from "lucide-react"
 import { mockAssessment, type Assessment, type Interaction, type KeyAction } from "../../../data/mock-assessment"
 import { mockParticipants } from "../../../data/mock-participants"
 import { ContextModal } from "../../../components/context-modal"
@@ -19,19 +32,23 @@ export default function RatingPage() {
   const [assessment, setAssessment] = useState<Assessment>(mockAssessment)
   const [expandedCompetencies, setExpandedCompetencies] = useState<string[]>(["business-acumen"])
   const [selectedContextEvidence, setSelectedContextEvidence] = useState<Interaction | null>(null)
-  const [barsSelections, setBarsSelections] = useState<{ [keyActionId: string]: { [behaviorId: string]: boolean } }>({})
+  const [barsSelections, setBarsSelections] = useState<{
+    [keyActionId: string]: { [interactionId: string]: { [behaviorId: string]: boolean } }
+  }>({})
+  const [activeBarsTab, setActiveBarsTab] = useState<{
+    [keyActionId: string]: "strength" | "meet-requirement" | "need-improvement"
+  }>({})
 
   // Get participant info
   const participant = mockParticipants.find((p) => p.id === participantId)
 
   useEffect(() => {
-    // Update assessment data based on participant ID
     if (participant) {
       setAssessment((prev) => ({
         ...prev,
         participant: {
           name: participant.name,
-          totalTime: "1 Jam 30 Menit", // This could be dynamic based on participant
+          totalTime: "1 Jam 30 Menit",
           date: participant.assessmentDate,
         },
       }))
@@ -81,12 +98,15 @@ export default function RatingPage() {
     alert("Rationale saved successfully!")
   }
 
-  const handleBarsSelection = (keyActionId: string, behaviorId: string, checked: boolean) => {
+  const handleBarsSelection = (keyActionId: string, interactionId: string, behaviorId: string, checked: boolean) => {
     setBarsSelections((prev) => ({
       ...prev,
       [keyActionId]: {
         ...prev[keyActionId],
-        [behaviorId]: checked,
+        [interactionId]: {
+          ...prev[keyActionId]?.[interactionId],
+          [behaviorId]: checked,
+        },
       },
     }))
   }
@@ -94,17 +114,37 @@ export default function RatingPage() {
   // Placeholder algorithm to derive rating from BARS selections
   const deriveRating = useMemo(() => {
     return (keyActionId: string): KeyAction["rating"] | "Belum Dinilai" => {
-      const selectedBehaviors = barsSelections[keyActionId] || {}
+      const keyActionSelections = barsSelections[keyActionId] || {}
       const behaviors = barsChecklist[keyActionId] || []
 
-      const hasStrength = behaviors.some((b) => b.level === "strength" && selectedBehaviors[b.id])
-      const hasMeetRequirement = behaviors.some((b) => b.level === "meet-requirement" && selectedBehaviors[b.id])
-      const hasNeedsImprovement = behaviors.some((b) => b.level === "need-improvement" && selectedBehaviors[b.id])
+      let totalScore = 0
 
-      if (hasStrength) return "strength"
-      if (hasMeetRequirement) return "meet-requirement"
-      if (hasNeedsImprovement) return "need-improvement"
-      return "Belum Dinilai"
+      // Iterate through all interactions for this key action
+      Object.values(keyActionSelections).forEach((interactionSelections) => {
+        Object.entries(interactionSelections).forEach(([behaviorId, isSelected]) => {
+          if (isSelected) {
+            const behavior = behaviors.find((b) => b.id === behaviorId)
+            if (behavior) {
+              switch (behavior.level) {
+                case "strength":
+                  totalScore += 2
+                  break
+                case "meet-requirement":
+                  totalScore += 1
+                  break
+                case "need-improvement":
+                  totalScore -= 1
+                  break
+              }
+            }
+          }
+        })
+      })
+
+      // Apply thresholds
+      if (totalScore >= 4) return "strength"
+      if (totalScore >= 1) return "meet-requirement"
+      return "need-improvement"
     }
   }, [barsSelections])
 
@@ -119,6 +159,56 @@ export default function RatingPage() {
       case "Belum Dinilai":
       default:
         return <span className="text-gray-500 font-bold">Belum Dinilai</span>
+    }
+  }
+
+  const getKeyActionIdForInteraction = (interactionId: string): string => {
+    for (const competency of assessment.competencies) {
+      for (const keyAction of competency.keyActions) {
+        if (keyAction.interactions.some((interaction) => interaction.id === interactionId)) {
+          return keyAction.id
+        }
+      }
+    }
+    return ""
+  }
+
+  // Helper function to get interaction type icon
+  const getInteractionIcon = (type: Interaction["type"]) => {
+    switch (type) {
+      case "email":
+        return <Mail size={20} className="text-blue-600" />
+      case "chat":
+        return <MessageCircle size={20} className="text-green-600" />
+      case "document":
+        return <FileText size={20} className="text-purple-600" />
+      case "document-creation":
+        return <FileText size={20} className="text-gray-600" />
+      case "chatbot":
+        return <Bot size={20} className="text-orange-600" />
+      case "call":
+        return <Phone size={20} className="text-indigo-600" />
+      default:
+        return <FileText size={20} className="text-gray-600" />
+    }
+  }
+
+  const getInteractionTypeLabel = (type: Interaction["type"]) => {
+    switch (type) {
+      case "email":
+        return "Email"
+      case "chat":
+        return "Chat"
+      case "document":
+        return "Dokumen"
+      case "document-creation":
+        return "Membuat Dokumen"
+      case "chatbot":
+        return "AI Chatbot"
+      case "call":
+        return "Call"
+      default:
+        return "Dokumen"
     }
   }
 
@@ -227,7 +317,7 @@ export default function RatingPage() {
                                     <span className="text-base font-normal text-gray-600">{keyAction.description}</span>
                                   </h4>
 
-                                  {/* Raw Interactions Section */}
+                                  {/* Raw Interactions Section - Vertical Layout */}
                                   {keyAction.interactions.length > 0 && (
                                     <div className="mb-6">
                                       <h5 className="text-sm font-medium text-gray-700 mb-3 uppercase tracking-wide">
@@ -237,19 +327,39 @@ export default function RatingPage() {
                                         {keyAction.interactions.map((interaction) => (
                                           <div
                                             key={interaction.id}
-                                            className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200"
+                                            className={`flex items-center justify-between p-4 rounded-lg border transition-all ${
+                                              selectedContextEvidence?.id === interaction.id
+                                                ? "bg-blue-100 border-blue-500 shadow-md"
+                                                : "bg-blue-50 border-blue-200 hover:bg-blue-100 hover:border-blue-300"
+                                            }`}
                                           >
                                             <div className="flex-1">
-                                              <h6 className="font-medium text-blue-900 mb-1">{interaction.title}</h6>
-                                              <p className="text-sm text-blue-700">
-                                                {interaction.timestamp} • {interaction.participants.join(", ")}
+                                              <div className="flex items-center gap-3 mb-1">
+                                                {getInteractionIcon(interaction.type)}
+                                                <h6 className="font-medium text-blue-900">
+                                                  Interaksi {getInteractionTypeLabel(interaction.type)}:{" "}
+                                                  {interaction.simulationName}
+                                                </h6>
+                                              </div>
+                                              <p className="text-sm text-blue-700 flex items-center gap-2">
+                                                <Clock size={14} />
+                                                <span>{interaction.timestamp}</span>
+                                                <span className="mx-1">•</span>
+                                                <Users size={14} />
+                                                <span>{interaction.participants.join(", ")}</span>
                                               </p>
                                             </div>
                                             <button
                                               onClick={() => setSelectedContextEvidence(interaction)}
-                                              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
+                                              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                                                selectedContextEvidence?.id === interaction.id
+                                                  ? "bg-blue-600 text-white"
+                                                  : "bg-blue-600 text-white hover:bg-blue-700"
+                                              }`}
                                             >
-                                              Lihat Data Simulasi
+                                              {selectedContextEvidence?.id === interaction.id
+                                                ? "Sedang Dibuka"
+                                                : "Lihat Data Simulasi"}
                                             </button>
                                           </div>
                                         ))}
@@ -266,118 +376,112 @@ export default function RatingPage() {
                                         </h5>
                                       </div>
                                       <p className="text-sm text-slate-600 mb-6">
-                                        Centang perilaku yang ditunjukkan peserta berdasarkan data simulasi yang telah
-                                        Anda review.
+                                        {selectedContextEvidence
+                                          ? "Centang perilaku yang ditunjukkan peserta dalam interaksi yang sedang dibuka."
+                                          : "Buka salah satu data simulasi untuk mulai menandai perilaku."}
                                       </p>
 
-                                      <div className="space-y-6">
-                                        {/* Strong (+) Behaviors */}
-                                        <div>
-                                          <h6 className="font-medium text-green-800 mb-3 flex items-center gap-2">
-                                            <span className="w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                                              +
-                                            </span>
-                                            Strong (Strength)
-                                          </h6>
-                                          <div className="space-y-3 ml-8">
-                                            {barsChecklist[keyAction.id]
-                                              .filter((behavior) => behavior.level === "strength")
-                                              .map((behavior) => (
-                                                <div
-                                                  key={behavior.id}
-                                                  className="flex items-start gap-3 p-3 bg-white rounded-md border border-green-200"
-                                                >
-                                                  <input
-                                                    type="checkbox"
-                                                    id={behavior.id}
-                                                    checked={barsSelections[keyAction.id]?.[behavior.id] || false}
-                                                    onChange={(e) =>
-                                                      handleBarsSelection(keyAction.id, behavior.id, e.target.checked)
-                                                    }
-                                                    className="mt-1 w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
-                                                  />
-                                                  <label
-                                                    htmlFor={behavior.id}
-                                                    className="text-sm text-gray-800 cursor-pointer flex-1"
-                                                  >
-                                                    {behavior.description}
-                                                  </label>
-                                                </div>
-                                              ))}
-                                          </div>
-                                        </div>
+                                      {/* Horizontal Tabs */}
+                                      <div className="flex space-x-1 mb-6 bg-gray-200 p-1 rounded-lg">
+                                        {[
+                                          { key: "strength", label: "Strength (+)", color: "green" },
+                                          { key: "meet-requirement", label: "Meet Requirement (/)", color: "yellow" },
+                                          { key: "need-improvement", label: "Needs Improvement (-)", color: "red" },
+                                        ].map((tab) => (
+                                          <button
+                                            key={tab.key}
+                                            onClick={() =>
+                                              setActiveBarsTab((prev) => ({
+                                                ...prev,
+                                                [keyAction.id]: tab.key as
+                                                  | "strength"
+                                                  | "meet-requirement"
+                                                  | "need-improvement",
+                                              }))
+                                            }
+                                            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                                              (activeBarsTab[keyAction.id] || "strength") === tab.key
+                                                ? `bg-${tab.color}-100 text-${tab.color}-800 border border-${tab.color}-300`
+                                                : "text-gray-600 hover:text-gray-800 hover:bg-gray-100"
+                                            }`}
+                                          >
+                                            {tab.label}
+                                          </button>
+                                        ))}
+                                      </div>
 
-                                        {/* Meets Requirement (/) Behaviors */}
-                                        <div>
-                                          <h6 className="font-medium text-yellow-800 mb-3 flex items-center gap-2">
-                                            <span className="w-6 h-6 bg-yellow-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                                              /
-                                            </span>
-                                            Meets Requirement
-                                          </h6>
-                                          <div className="space-y-3 ml-8">
-                                            {barsChecklist[keyAction.id]
-                                              .filter((behavior) => behavior.level === "meet-requirement")
-                                              .map((behavior) => (
-                                                <div
-                                                  key={behavior.id}
-                                                  className="flex items-start gap-3 p-3 bg-white rounded-md border border-yellow-200"
-                                                >
-                                                  <input
-                                                    type="checkbox"
-                                                    id={behavior.id}
-                                                    checked={barsSelections[keyAction.id]?.[behavior.id] || false}
-                                                    onChange={(e) =>
-                                                      handleBarsSelection(keyAction.id, behavior.id, e.target.checked)
-                                                    }
-                                                    className="mt-1 w-4 h-4 text-yellow-500 border-gray-300 rounded focus:ring-yellow-500"
-                                                  />
-                                                  <label
-                                                    htmlFor={behavior.id}
-                                                    className="text-sm text-gray-800 cursor-pointer flex-1"
-                                                  >
-                                                    {behavior.description}
-                                                  </label>
-                                                </div>
-                                              ))}
-                                          </div>
-                                        </div>
+                                      {/* Tab Content */}
+                                      <div className="space-y-3">
+                                        {barsChecklist[keyAction.id]
+                                          .filter(
+                                            (behavior) =>
+                                              behavior.level === (activeBarsTab[keyAction.id] || "strength"),
+                                          )
+                                          .map((behavior) => {
+                                            // Calculate total count for this behavior across all interactions
+                                            const totalCount = Object.values(barsSelections[keyAction.id] || {}).reduce(
+                                              (count, interactionSelections) => {
+                                                return count + (interactionSelections[behavior.id] ? 1 : 0)
+                                              },
+                                              0,
+                                            )
 
-                                        {/* Needs Improvement (-) Behaviors */}
-                                        <div>
-                                          <h6 className="font-medium text-red-800 mb-3 flex items-center gap-2">
-                                            <span className="w-6 h-6 bg-red-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                                              -
-                                            </span>
-                                            Needs Improvement
-                                          </h6>
-                                          <div className="space-y-3 ml-8">
-                                            {barsChecklist[keyAction.id]
-                                              .filter((behavior) => behavior.level === "need-improvement")
-                                              .map((behavior) => (
-                                                <div
-                                                  key={behavior.id}
-                                                  className="flex items-start gap-3 p-3 bg-white rounded-md border border-red-200"
-                                                >
+                                            // Check if this behavior is selected for the current interaction
+                                            const isCheckedForCurrentInteraction =
+                                              selectedContextEvidence &&
+                                              barsSelections[keyAction.id]?.[selectedContextEvidence.id]?.[behavior.id]
+
+                                            const tabColor =
+                                              activeBarsTab[keyAction.id] === "strength"
+                                                ? "green"
+                                                : activeBarsTab[keyAction.id] === "meet-requirement"
+                                                  ? "yellow"
+                                                  : "red"
+
+                                            return (
+                                              <div
+                                                key={behavior.id}
+                                                className={`flex items-start gap-3 p-3 bg-white rounded-md border border-${tabColor}-200`}
+                                              >
+                                                <div className="flex items-center gap-2">
                                                   <input
                                                     type="checkbox"
                                                     id={behavior.id}
-                                                    checked={barsSelections[keyAction.id]?.[behavior.id] || false}
-                                                    onChange={(e) =>
-                                                      handleBarsSelection(keyAction.id, behavior.id, e.target.checked)
-                                                    }
-                                                    className="mt-1 w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
+                                                    checked={isCheckedForCurrentInteraction || false}
+                                                    disabled={!selectedContextEvidence}
+                                                    onChange={(e) => {
+                                                      if (selectedContextEvidence) {
+                                                        handleBarsSelection(
+                                                          keyAction.id,
+                                                          selectedContextEvidence.id,
+                                                          behavior.id,
+                                                          e.target.checked,
+                                                        )
+                                                      }
+                                                    }}
+                                                    className={`w-4 h-4 text-${tabColor}-600 border-gray-300 rounded focus:ring-${tabColor}-500 disabled:opacity-50`}
                                                   />
-                                                  <label
-                                                    htmlFor={behavior.id}
-                                                    className="text-sm text-gray-800 cursor-pointer flex-1"
+                                                  <div
+                                                    className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                                                      totalCount > 0
+                                                        ? `bg-${tabColor}-600 text-white`
+                                                        : "bg-gray-200 text-gray-500"
+                                                    }`}
                                                   >
-                                                    {behavior.description}
-                                                  </label>
+                                                    {totalCount}
+                                                  </div>
                                                 </div>
-                                              ))}
-                                          </div>
-                                        </div>
+                                                <div className="flex-1">
+                                                  <div className="text-sm text-gray-800">{behavior.description}</div>
+                                                  {totalCount > 0 && (
+                                                    <div className={`text-xs text-${tabColor}-600 mt-1`}>
+                                                      Diamati {totalCount} kali
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              </div>
+                                            )
+                                          })}
                                       </div>
                                     </div>
                                   )}

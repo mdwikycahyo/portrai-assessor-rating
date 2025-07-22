@@ -7,6 +7,7 @@ export interface Interaction {
   participants: string[]
   activityType: string
   contextTitle: string
+  simulationName: string // New property
 }
 
 export interface KeyAction {
@@ -16,6 +17,7 @@ export interface KeyAction {
   interactions: Interaction[]
   rating?: "need-improvement" | "meet-requirement" | "strength"
   ratingNote?: string // Added new field for assessor's note on rating
+  observedBehaviors?: { [interactionId: string]: { [behaviorId: string]: boolean } } // New field
 }
 
 export interface Competency {
@@ -76,6 +78,7 @@ export const mockAssessment: Assessment = {
               participants: ["John Doe"],
               activityType: "Report Writing",
               contextTitle: "Laporan Analisis Efisiensi Biaya",
+              simulationName: "Business Analysis", // New field
               fullContext: `LAPORAN ANALISIS EFISIENSI BIAYA
 Disusun oleh: John Doe
 Tanggal: 4 Juli 2025
@@ -113,6 +116,7 @@ Investasi dalam otomatisasi proses X akan memberikan ROI sebesar 300% dalam 18 b
               participants: ["John Doe", "AI Assistant"],
               activityType: "AI Consultation",
               contextTitle: "Konsultasi Analisis Pasar dengan AI",
+              simulationName: "Platform Underutilization", // New field
               fullContext: `John Doe: Halo, saya lagi butuh info nih tentang cara analisis tren pasar di industri teknologi. Ada saran?
 
 AI Assistant: Tentu! Untuk menganalisis tren pasar teknologi secara efektif, saya merekomendasikan pendekatan multi-dimensi:
@@ -160,6 +164,7 @@ AI Assistant: Sama-sama! Senang bisa membantu. Kalau ada pertanyaan lagi, jangan
               participants: ["Manager AI", "John Doe"],
               activityType: "Crisis Management",
               contextTitle: "Krisis Klien - Penanganan Darurat",
+              simulationName: "Supply Chain Bottleneck", // New field
               fullContext: `Email Thread: Krisis Klien
 
 Dari: Manager AI <manager@company.com>
@@ -200,6 +205,7 @@ Baik, saya akan koordinasikan dengan tim teknis untuk penanganan darurat. Terima
               participants: ["John Doe", "Team Lead", "Marketing Team"],
               activityType: "Team Collaboration",
               contextTitle: "Diskusi Strategi Produk Tim",
+              simulationName: "Performance Coaching", // New field
               fullContext: `[11:00 AM] John Doe: Tim, saya baru saja meninjau laporan tren pasar terbaru. Data menunjukkan pergeseran signifikan dalam preferensi konsumen ke arah produk yang lebih ramah lingkungan.
 
 [11:02 AM] Team Lead: Itu menarik, John. Apa implikasinya bagi kita?
@@ -219,6 +225,7 @@ Baik, saya akan koordinasikan dengan tim teknis untuk penanganan darurat. Terima
           ],
           rating: undefined,
           ratingNote: "", // Initialize ratingNote
+          observedBehaviors: {},
         },
         {
           id: "mengintegrasikan",
@@ -234,6 +241,7 @@ Baik, saya akan koordinasikan dengan tim teknis untuk penanganan darurat. Terima
               participants: ["John Doe"],
               activityType: "Document Review",
               contextTitle: "Review Laporan Keuangan Q2 2025",
+              simulationName: "CSR Project", // New field
               fullContext: `DOCUMENT_TITLE: Laporan Keuangan Q2 2025.pdf
 DOCUMENT_OPENED: 8 Juli 2025, 09:00
 DOCUMENT_CLOSED: 8 Juli 2025, 09:10
@@ -273,6 +281,7 @@ Identifikasi risiko potensial dan strategi mitigasi untuk kuartal mendatang tela
               participants: ["John Doe", "CEO"],
               activityType: "Strategic Discussion",
               contextTitle: "Panggilan Strategis dengan CEO",
+              simulationName: "Supply Chain Bottleneck", // New field
               fullContext: `CEO: John, terima kasih sudah menyempatkan waktu. Saya ingin membahas analisis pasar yang kamu submit minggu lalu.
 
 John Doe: Tentu, saya senang bisa mendiskusikan ini lebih detail.
@@ -311,6 +320,7 @@ CEO: Perfect. Thanks John, good work on this analysis.`,
               participants: ["John Doe", "Senior Manager"],
               activityType: "Strategic Planning",
               contextTitle: "Diskusi Strategis dengan Senior Manager",
+              simulationName: "Performance Coaching", // New field
               fullContext: `[14:00 PM] Senior Manager: John, saya lihat proposal integrasi data yang kamu kirim. Menarik sekali.
 
 [14:02 PM] John Doe: Terima kasih. Saya rasa dengan mengintegrasikan data dari berbagai sumber, kita bisa dapat insight yang lebih holistik untuk decision making.
@@ -339,6 +349,7 @@ Total 6 weeks untuk full implementation.
           ],
           rating: undefined,
           ratingNote: "", // Initialize ratingNote
+          observedBehaviors: {},
         },
       ],
       rationale: "",
