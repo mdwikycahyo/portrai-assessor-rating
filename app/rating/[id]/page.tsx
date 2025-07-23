@@ -341,13 +341,6 @@ export default function RatingPage() {
                                                   {interaction.simulationName}
                                                 </h6>
                                               </div>
-                                              <p className="text-sm text-blue-700 flex items-center gap-2">
-                                                <Clock size={14} />
-                                                <span>{interaction.timestamp}</span>
-                                                <span className="mx-1">•</span>
-                                                <Users size={14} />
-                                                <span>{interaction.participants.join(", ")}</span>
-                                              </p>
                                             </div>
                                             <button
                                               onClick={() => setSelectedContextEvidence(interaction)}
@@ -605,6 +598,9 @@ export default function RatingPage() {
               <InteractionDetailPanel
                 evidence={selectedContextEvidence}
                 onClose={() => setSelectedContextEvidence(null)}
+                allInteractions={assessment.competencies.flatMap((comp) =>
+                  comp.keyActions.flatMap((ka) => ka.interactions),
+                )}
               />
             </div>
           )}
