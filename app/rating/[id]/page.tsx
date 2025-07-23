@@ -144,7 +144,7 @@ export default function RatingPage() {
       // Apply thresholds
       if (totalScore >= 4) return "strength"
       if (totalScore >= 1) return "meet-requirement"
-      return "need-improvement"
+      if (totalScore < 0) return "need-improvement"
     }
   }, [barsSelections])
 
