@@ -230,7 +230,7 @@ export default function RatingPage() {
           <Link href="/" className="text-gray-500 hover:text-gray-700">
             <ChevronLeft size={20} />
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">Assessment Report</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Assessment Rating</h1>
         </div>
 
         {/* Split-Pane Layout */}
