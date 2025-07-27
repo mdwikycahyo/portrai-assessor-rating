@@ -2,24 +2,38 @@
 
 import { X, Mail, MessageCircle, FileText, Bot, Phone, Clock, Users, ChevronDown } from "lucide-react"
 import type { Interaction } from "../data/mock-assessment"
-import ReactMarkdown from "react-markdown"
+import { useState } from "react"
+import type { JSX } from "react/jsx-runtime" // Import JSX to fix the undeclared variable error
 
 interface InteractionDetailPanelProps {
   evidence: Interaction
   onClose: () => void
-  allInteractions?: Interaction[] // New prop for all available interactions
+  allInteractions?: Interaction[]
+  isAIMode?: boolean
+  aiHighlights?: { [interactionId: string]: string[] }
+  aiBehaviorEvidence?: { [behaviorId: string]: { interactionId: string; segments: string[] }[] }
+  barsChecklist?: { [keyActionId: string]: Array<{ id: string; description: string; level: string }> }
 }
 
-export function InteractionDetailPanel({ evidence, onClose, allInteractions = [] }: InteractionDetailPanelProps) {
+export function InteractionDetailPanel({
+  evidence,
+  onClose,
+  allInteractions = [],
+  isAIMode = false,
+  aiHighlights = {},
+  aiBehaviorEvidence = {},
+  barsChecklist = {},
+}: InteractionDetailPanelProps) {
+  const [hoveredSegment, setHoveredSegment] = useState<string | null>(null)
+  const [tooltipPosition, setTooltipPosition] = useState<{ x: number; y: number } | null>(null)
+
   // Find related interactions and create chronological thread
   const relatedInteractions = allInteractions.filter(
     (interaction) =>
       interaction.simulationName === evidence.simulationName || interaction.contextTitle === evidence.contextTitle,
   )
 
-  // Sort chronologically by timestamp
   const chronologicalThread = relatedInteractions.sort((a, b) => {
-    // Simple timestamp comparison - you might need to adjust based on your timestamp format
     return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
   })
 
@@ -59,6 +73,80 @@ export function InteractionDetailPanel({ evidence, onClose, allInteractions = []
       default:
         return "gray"
     }
+  }
+
+  // Function to find which BARS items relate to a highlighted segment
+  const findRelatedBarsItems = (segment: string, interactionId: string): string[] => {
+    const relatedBehaviors: string[] = []
+
+    Object.entries(aiBehaviorEvidence).forEach(([behaviorId, evidenceList]) => {
+      evidenceList.forEach((evidence) => {
+        if (evidence.interactionId === interactionId && evidence.segments.includes(segment)) {
+          relatedBehaviors.push(behaviorId)
+        }
+      })
+    })
+
+    return relatedBehaviors
+  }
+
+  // Function to get behavior description from BARS checklist
+  const getBehaviorDescription = (behaviorId: string): string => {
+    for (const keyActionId in barsChecklist) {
+      const behavior = barsChecklist[keyActionId].find((b) => b.id === behaviorId)
+      if (behavior) {
+        return behavior.description
+      }
+    }
+    return behaviorId
+  }
+
+  // Helper function to highlight AI-identified segments with hover functionality
+  const highlightAISegments = (text: string, interactionId: string, isParticipantText: boolean): JSX.Element => {
+    if (!isAIMode || !aiHighlights[interactionId] || aiHighlights[interactionId].length === 0 || !isParticipantText) {
+      return <span>{text}</span>
+    }
+
+    let highlightedText = text
+    const segments = aiHighlights[interactionId]
+
+    // Sort segments by length (longest first) to avoid partial replacements
+    const sortedSegments = [...segments].sort((a, b) => b.length - a.length)
+
+    sortedSegments.forEach((segment) => {
+      const escapedSegment = segment.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+      const regex = new RegExp(`(${escapedSegment})`, "gi")
+
+      highlightedText = highlightedText.replace(regex, (match) => {
+        return `<mark class="bg-yellow-200 px-1 rounded cursor-pointer hover:bg-yellow-300 transition-colors" data-segment="${match}">${match}</mark>`
+      })
+    })
+
+    return (
+      <span
+        dangerouslySetInnerHTML={{ __html: highlightedText }}
+        onClick={(e) => {
+          const target = e.target as HTMLElement
+          if (target.tagName === "MARK") {
+            const segment = target.getAttribute("data-segment")
+            if (segment) {
+              const relatedBehaviors = findRelatedBarsItems(segment, interactionId)
+              if (relatedBehaviors.length > 0) {
+                setHoveredSegment(relatedBehaviors.map(getBehaviorDescription).join(", "))
+                const rect = target.getBoundingClientRect()
+                setTooltipPosition({ x: rect.left + rect.width / 2, y: rect.top - 10 })
+
+                // Auto-hide tooltip after 3 seconds
+                setTimeout(() => {
+                  setHoveredSegment(null)
+                  setTooltipPosition(null)
+                }, 3000)
+              }
+            }
+          }
+        }}
+      />
+    )
   }
 
   const renderEmailInterface = (interaction: Interaction) => (
@@ -123,7 +211,7 @@ export function InteractionDetailPanel({ evidence, onClose, allInteractions = []
                           isParticipantResponse ? "text-blue-900 font-medium" : "text-gray-800"
                         }`}
                       >
-                        {line}
+                        {highlightAISegments(line, interaction.id, isParticipantResponse)}
                       </div>
                     )
                   }
@@ -161,7 +249,6 @@ export function InteractionDetailPanel({ evidence, onClose, allInteractions = []
             .split("\n")
             .filter((line) => line.trim())
             .map((message, index) => {
-              const timeMatch = message.match(/^\[(.+?)\]/)
               const senderMatch = message.match(/^\[.+?\]\s*(.+?):\s*(.+)$/)
 
               if (senderMatch) {
@@ -180,7 +267,9 @@ export function InteractionDetailPanel({ evidence, onClose, allInteractions = []
                       <div className={`text-xs mb-1 ${isParticipant ? "text-green-100 font-medium" : "opacity-75"}`}>
                         {sender}
                       </div>
-                      <div className={`text-sm leading-relaxed ${isParticipant ? "font-medium" : ""}`}>{content}</div>
+                      <div className={`text-sm leading-relaxed ${isParticipant ? "font-medium" : ""}`}>
+                        {highlightAISegments(content, interaction.id, isParticipant)}
+                      </div>
                     </div>
                   </div>
                 )
@@ -193,7 +282,6 @@ export function InteractionDetailPanel({ evidence, onClose, allInteractions = []
   )
 
   const renderDocumentInterface = (interaction: Interaction) => {
-    // Parse document data
     const lines = interaction.fullContext.split("\n")
     const documentTitle =
       lines.find((line) => line.startsWith("DOCUMENT_TITLE:"))?.replace("DOCUMENT_TITLE: ", "") ||
@@ -204,7 +292,6 @@ export function InteractionDetailPanel({ evidence, onClose, allInteractions = []
       .find((line) => line.startsWith("TOTAL_READING_TIME:"))
       ?.replace("TOTAL_READING_TIME: ", "")
 
-    // Extract document content (everything after DOCUMENT_CONTENT:)
     const contentStartIndex = lines.findIndex((line) => line.trim() === "DOCUMENT_CONTENT:")
     const documentContent =
       contentStartIndex !== -1 ? lines.slice(contentStartIndex + 1).join("\n") : interaction.fullContext
@@ -244,7 +331,6 @@ export function InteractionDetailPanel({ evidence, onClose, allInteractions = []
               if (line.trim() === "") {
                 return <div key={index} className="h-4" />
               } else if (line.includes("[HIGHLIGHTED]") && line.includes("[/HIGHLIGHTED]")) {
-                // Handle highlighted text
                 const parts = line.split(/(\[HIGHLIGHTED\].*?\[\/HIGHLIGHTED\])/)
                 return (
                   <p key={index} className="text-gray-800 mb-3 leading-relaxed">
@@ -261,32 +347,10 @@ export function InteractionDetailPanel({ evidence, onClose, allInteractions = []
                     })}
                   </p>
                 )
-              } else if (line.match(/^[A-Z\s]+$/) && line.length > 3) {
-                // Headers (all caps, longer than 3 chars)
-                return (
-                  <h3 key={index} className="text-lg font-bold text-purple-900 mt-6 mb-3 first:mt-0">
-                    {line}
-                  </h3>
-                )
-              } else if (line.match(/^\d+\./)) {
-                // Numbered lists
-                return (
-                  <div key={index} className="ml-4 mb-2 text-gray-800">
-                    {line}
-                  </div>
-                )
-              } else if (line.includes(":") && !line.startsWith("   ")) {
-                // Key-value pairs or subheadings (not indented)
-                return (
-                  <div key={index} className="font-medium text-gray-900 mt-4 mb-2">
-                    {line}
-                  </div>
-                )
               } else {
-                // Regular text
                 return (
                   <p key={index} className="text-gray-800 mb-3 leading-relaxed">
-                    {line}
+                    {highlightAISegments(line, interaction.id, true)}
                   </p>
                 )
               }
@@ -322,31 +386,27 @@ export function InteractionDetailPanel({ evidence, onClose, allInteractions = []
             if (line.trim() === "") {
               return <div key={index} className="h-4" />
             } else if (line.match(/^[A-Z\s]+$/)) {
-              // Headers (all caps)
               return (
                 <h3 key={index} className="text-lg font-bold text-gray-900 mt-6 mb-3 first:mt-0">
                   {line}
                 </h3>
               )
             } else if (line.match(/^\d+\./)) {
-              // Numbered lists
               return (
                 <div key={index} className="ml-4 mb-2 text-gray-800">
-                  {line}
+                  {highlightAISegments(line, interaction.id, true)}
                 </div>
               )
             } else if (line.includes(":")) {
-              // Key-value pairs or subheadings
               return (
                 <div key={index} className="font-medium text-gray-900 mt-4 mb-2">
-                  {line}
+                  {highlightAISegments(line, interaction.id, true)}
                 </div>
               )
             } else {
-              // Regular text
               return (
                 <p key={index} className="text-gray-800 mb-3 leading-relaxed">
-                  {line}
+                  {highlightAISegments(line, interaction.id, true)}
                 </p>
               )
             }
@@ -378,25 +438,19 @@ export function InteractionDetailPanel({ evidence, onClose, allInteractions = []
       <div className="p-4 max-h-96 overflow-y-auto bg-gradient-to-b from-orange-25 to-gray-50">
         <div className="space-y-4">
           {(() => {
-            // Parse the conversation more intelligently
             const text = interaction.fullContext.trim()
             const messages = []
-
-            // Split by lines that start with either "John Doe:" or "AI Assistant:"
             const lines = text.split("\n")
             let currentMessage = null
 
             for (let i = 0; i < lines.length; i++) {
               const line = lines[i]
 
-              // Check if this line starts a new message
               if (line.startsWith("John Doe:") || line.startsWith("AI Assistant:")) {
-                // Save previous message if exists
                 if (currentMessage) {
                   messages.push(currentMessage)
                 }
 
-                // Start new message
                 const colonIndex = line.indexOf(":")
                 const speaker = line.substring(0, colonIndex).trim()
                 const content = line.substring(colonIndex + 1).trim()
@@ -406,15 +460,12 @@ export function InteractionDetailPanel({ evidence, onClose, allInteractions = []
                   content: content,
                 }
               } else if (currentMessage && line.trim()) {
-                // Add line to current message content
                 currentMessage.content += "\n" + line
               } else if (currentMessage && !line.trim()) {
-                // Empty line - add as line break in content
                 currentMessage.content += "\n"
               }
             }
 
-            // Don't forget the last message
             if (currentMessage) {
               messages.push(currentMessage)
             }
@@ -439,7 +490,7 @@ export function InteractionDetailPanel({ evidence, onClose, allInteractions = []
                       {isAI ? "🤖 AI Assistant" : isUser ? "👤 John Doe" : speaker}
                     </div>
                     <div className={`prose prose-sm max-w-none text-sm leading-relaxed ${isUser ? "font-medium" : ""}`}>
-                      <ReactMarkdown>{content.trim()}</ReactMarkdown>
+                      {highlightAISegments(content.trim(), interaction.id, isUser)}
                     </div>
                   </div>
                 </div>
@@ -486,7 +537,7 @@ export function InteractionDetailPanel({ evidence, onClose, allInteractions = []
                     : "bg-gray-50 text-gray-800"
                 }`}
               >
-                {line}
+                {highlightAISegments(line, interaction.id, isParticipantLine)}
               </div>
             )
           })}
@@ -514,12 +565,25 @@ export function InteractionDetailPanel({ evidence, onClose, allInteractions = []
     }
   }
 
-  // Use chronological thread if there are related interactions, otherwise just show the single evidence
   const interactionsToRender = chronologicalThread.length > 1 ? chronologicalThread : [evidence]
   const sourceColor = getSourceColor(evidence.type)
 
   return (
-    <div className="h-full flex flex-col bg-white border border-gray-200 rounded-lg mr-4 shadow-lg">
+    <div className="h-full flex flex-col bg-white border border-gray-200 rounded-lg mr-4 shadow-lg relative">
+      {/* Tooltip for Path B functionality */}
+      {hoveredSegment && tooltipPosition && (
+        <div
+          className="fixed z-50 bg-gray-900 text-white text-xs px-2 py-1 rounded shadow-lg pointer-events-none"
+          style={{
+            left: tooltipPosition.x,
+            top: tooltipPosition.y,
+            transform: "translateX(-50%) translateY(-100%)",
+          }}
+        >
+          Related to: {hoveredSegment}
+        </div>
+      )}
+
       {/* Panel Header */}
       <div
         className={`flex items-center justify-between p-4 border-b bg-gradient-to-r from-${sourceColor}-50 to-${sourceColor}-100 border-${sourceColor}-200`}
@@ -545,26 +609,19 @@ export function InteractionDetailPanel({ evidence, onClose, allInteractions = []
         </button>
       </div>
 
-      {/* Panel Content - Enhanced Chronological Thread */}
+      {/* Panel Content */}
       <div className="flex-1 overflow-y-auto">
         <div className="p-4 space-y-12">
-          {interactionsToRender.map((interaction, index) => {
-            const interactionColor = getSourceColor(interaction.type)
-
-            return (
-              <div key={interaction.id} className="relative">
-                {/* Flow indicator chevron */}
-                {chronologicalThread.length > 1 && index < interactionsToRender.length - 1 && (
-                  <div className="absolute left-0 top-full mt-3 w-6 h-6 flex items-center justify-center z-20">
-                    <ChevronDown size={24} className="text-gray-900" />
-                  </div>
-                )}
-
-                {/* Interaction content with enhanced left margin for timeline */}
-                <div>{renderInteractionContent(interaction)}</div>
-              </div>
-            )
-          })}
+          {interactionsToRender.map((interaction, index) => (
+            <div key={interaction.id} className="relative">
+              {chronologicalThread.length > 1 && index < interactionsToRender.length - 1 && (
+                <div className="absolute left-0 top-full mt-3 w-6 h-6 flex items-center justify-center z-20">
+                  <ChevronDown size={24} className="text-gray-900" />
+                </div>
+              )}
+              <div>{renderInteractionContent(interaction)}</div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

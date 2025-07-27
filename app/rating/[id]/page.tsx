@@ -12,8 +12,6 @@ import {
   FileText,
   Bot,
   Phone,
-  Clock,
-  Users,
 } from "lucide-react"
 import { mockAssessment, type Assessment, type Interaction, type KeyAction } from "../../../data/mock-assessment"
 import { mockParticipants } from "../../../data/mock-participants"
@@ -38,6 +36,136 @@ export default function RatingPage() {
   const [activeBarsTab, setActiveBarsTab] = useState<{
     [keyActionId: string]: "strength" | "meet-requirement" | "need-improvement"
   }>({})
+  const [currentAIHighlights, setCurrentAIHighlights] = useState<{ [interactionId: string]: string[] }>({})
+
+  const [isAIEnabled, setIsAIEnabled] = useState(false)
+
+  // Simulated AI-generated summaries for demonstration - only used in Opsi 2
+  const aiSummaries = {
+    analisis: {
+      overview:
+        "AI telah menganalisis interaksi peserta dan mengidentifikasi perilaku kunci berikut yang relevan dengan Key Action ini:",
+      strength: [
+        "Peserta menunjukkan kemampuan analisis strategis dengan mengajukan pertanyaan mendalam tentang tren pasar teknologi dan meminta kerangka kerja spesifik untuk implementasi",
+        "Mendemonstrasikan kemampuan mengidentifikasi peluang bisnis berdasarkan data penjualan Q3 dan mengusulkan strategi ekspansi B2B dengan pertimbangan timeline yang matang",
+        "Mengintegrasikan multiple data sources untuk menghasilkan insight yang actionable, termasuk analisis kompetitor dan proyeksi budget untuk R&D",
+      ],
+      meetRequirement: [
+        "Melakukan analisis dasar terhadap biaya operasional dengan fokus pada identifikasi peluang penghematan melalui otomatisasi proses",
+      ],
+      needsImprovement: [],
+    },
+    mengintegrasikan: {
+      overview:
+        "AI telah menganalisis interaksi peserta dan mengidentifikasi perilaku kunci berikut yang relevan dengan Key Action ini:",
+      strength: [
+        "Peserta menunjukkan kemampuan integrasi data yang kuat dengan menggabungkan insight dari berbagai departemen (Marketing, Operations, Finance) untuk membuat proposal yang komprehensif",
+        "Mendemonstrasikan kemampuan mengidentifikasi pola dan koneksi antar data yang kompleks, termasuk analisis risiko dan strategi mitigasi yang matang",
+      ],
+      meetRequirement: [
+        "Menggabungkan data dari laporan keuangan Q2 dengan cara yang standar untuk mengidentifikasi tren pertumbuhan dan peluang pasar",
+      ],
+      needsImprovement: [],
+    },
+  }
+
+  // AI evidence mapping - only used in Opsi 2
+  const aiBehaviorEvidence: {
+    [behaviorId: string]: { interactionId: string; segments: string[] }[]
+  } = {
+    "analisis-strong-1": [
+      {
+        interactionId: "interaction-1",
+        segments: [
+          "Setelah melakukan analisis awal dari log error dan data penjualan Q3, saya melihat peluang besar untuk ekspansi ke segmen B2B",
+        ],
+      },
+      {
+        interactionId: "interaction-2",
+        segments: [
+          "Data menunjukkan pergeseran signifikan dalam preferensi konsumen ke arah produk yang lebih ramah lingkungan",
+          "Saya rasa kita harus mempertimbangkan untuk mengembangkan lini produk baru yang berfokus pada keberlanjutan.",
+        ],
+      },
+    ],
+    "analisis-strong-2": [
+      {
+        interactionId: "interaction-4",
+        segments: [
+          "Untuk menganalisis tren pasar teknologi secara efektif, saya merekomendasikan pendekatan multi-dimensi",
+          "Porter's Five Forces untuk analisis kompetitif",
+          "PEST Analysis untuk faktor makro-lingkungan",
+          "Technology Adoption Lifecycle untuk menentukan waktu masuk pasar",
+        ],
+      },
+      {
+        interactionId: "interaction-2",
+        segments: [
+          "Berdasarkan analisis kompetitor, kita punya window 6 bulan sebelum mereka masuk ke space ini. Budget estimasi sekitar 500K untuk R&D awal.",
+        ],
+      },
+    ],
+    "analisis-strong-4": [
+      {
+        interactionId: "interaction-2",
+        segments: [
+          "Tim, saya baru saja meninjau laporan tren pasar terbaru. Data menunjukkan pergeseran signifikan dalam preferensi konsumen ke arah produk yang lebih ramah lingkungan.",
+          "Saya rasa kita harus mempertimbangkan untuk mengembangkan lini produk baru yang berfokus pada keberlanjutan. Ini bisa menjadi peluang besar untuk menangkap pangsa pasar yang sedang berkembang.",
+        ],
+      },
+      {
+        interactionId: "interaction-4",
+        segments: [
+          "Kunci integrasinya adalah: 1. Triangulasi: Validasi silang temuan dari berbagai sumber 2. Perencanaan Skenario: Buat 3 skenario (optimis, realistis, pesimis) 3. Matriks Dampak-Probabilitas: Prioritaskan wawasan berdasarkan potensi dampak dan kemungkinan",
+        ],
+      },
+    ],
+    "analisis-meet-3": [
+      {
+        interactionId: "interaction-3",
+        segments: [
+          "Laporan ini menyajikan analisis komprehensif terhadap biaya operasional perusahaan dengan fokus pada identifikasi peluang penghematan melalui otomatisasi proses X dapat mengurangi pengeluaran sebesar 15% atau setara dengan penghematan Rp 2.5 miliar per tahun.",
+          "Investasi dalam otomatisasi proses X akan memberikan ROI sebesar 300% dalam 18 bulan pertama.",
+        ],
+      },
+    ],
+    "integrasi-strong-1": [
+      {
+        interactionId: "interaction-7",
+        segments: [
+          "Berdasarkan analisis kompetitor dan market data, saya identifikasi 3 risiko utama: pertama, customer adoption rate yang mungkin lebih lambat dari proyeksi. Kedua, supply chain challenges untuk sustainable materials. Ketiga, initial investment yang cukup besar.",
+          "Untuk customer adoption, saya recommend pilot program di 2-3 kota besar dulu untuk test market response. Untuk supply chain, kita bisa mulai partnership dengan 2-3 supplier sustainable materials sekarang. Dan untuk investment, kita bisa phase implementation dalam 3 tahap untuk spread risk.",
+        ],
+      },
+      {
+        interactionId: "interaction-6",
+        segments: [
+          "Saya sudah identify beberapa potential issues: 1. Different data formats 2. Timing discrepancies 3. Definition inconsistencies Saya propose kita establish data governance framework dulu sebelum integration.",
+        ],
+      },
+    ],
+    "integrasi-strong-2": [
+      {
+        interactionId: "interaction-7",
+        segments: [
+          "Berdasarkan analisis kompetitor dan market data, saya identifikasi 3 risiko utama: pertama, customer adoption rate yang mungkin lebih lambat dari proyeksi. Kedua, supply chain challenges untuk sustainable materials. Ketiga, initial investment yang cukup besar.",
+          "Untuk customer adoption, saya recommend pilot program di 2-3 kota besar dulu untuk test market response. Untuk supply chain, kita bisa mulai partnership dengan 2-3 supplier sustainable materials sekarang. Dan untuk investment, kita bisa phase implementation dalam 3 tahap untuk spread risk.",
+        ],
+      },
+    ],
+    "integrasi-meet-1": [
+      {
+        interactionId: "interaction-8",
+        segments: [
+          "Revenue growth 12% YoY, exceeding target by 3%",
+          "Marketing ROI improved from 3.2x to 4.1x",
+          "Operations cost reduced by 8% through automation",
+          "Southeast Asia market shows 25% growth potential",
+          "Competitor analysis indicates market share opportunity in B2B segment",
+        ],
+      },
+    ],
+  }
 
   // Get participant info
   const participant = mockParticipants.find((p) => p.id === participantId)
@@ -87,13 +215,11 @@ export default function RatingPage() {
   }
 
   const saveKeyAction = (competencyId: string, keyActionId: string) => {
-    // Here you would typically send the key action data to your API
     console.log("Saving key action:", { competencyId, keyActionId })
     alert("Key Action saved successfully!")
   }
 
   const saveRationale = (competencyId: string, rationale: string) => {
-    // Here you would typically send the rationale data to your API
     console.log(`Saving rationale for ${competencyId}:`, rationale)
     alert("Rationale saved successfully!")
   }
@@ -111,7 +237,7 @@ export default function RatingPage() {
     }))
   }
 
-  // Placeholder algorithm to derive rating from BARS selections
+  // Algorithm to derive rating from BARS selections
   const deriveRating = useMemo(() => {
     return (keyActionId: string): KeyAction["rating"] | "Belum Dinilai" => {
       const keyActionSelections = barsSelections[keyActionId] || {}
@@ -119,7 +245,6 @@ export default function RatingPage() {
 
       let totalScore = 0
 
-      // Iterate through all interactions for this key action
       Object.values(keyActionSelections).forEach((interactionSelections) => {
         Object.entries(interactionSelections).forEach(([behaviorId, isSelected]) => {
           if (isSelected) {
@@ -141,10 +266,10 @@ export default function RatingPage() {
         })
       })
 
-      // Apply thresholds
       if (totalScore >= 4) return "strength"
       if (totalScore >= 1) return "meet-requirement"
       if (totalScore < 0) return "need-improvement"
+      return "Belum Dinilai"
     }
   }, [barsSelections])
 
@@ -160,17 +285,6 @@ export default function RatingPage() {
       default:
         return <span className="text-gray-500 font-bold">Belum Dinilai</span>
     }
-  }
-
-  const getKeyActionIdForInteraction = (interactionId: string): string => {
-    for (const competency of assessment.competencies) {
-      for (const keyAction of competency.keyActions) {
-        if (keyAction.interactions.some((interaction) => interaction.id === interactionId)) {
-          return keyAction.id
-        }
-      }
-    }
-    return ""
   }
 
   // Helper function to get interaction type icon
@@ -212,18 +326,99 @@ export default function RatingPage() {
     }
   }
 
+  // Function to handle "Lihat Bukti" click - only available in AI mode
+  const handleLihatBukti = (behaviorId: string, allInteractions: Interaction[]) => {
+    const evidenceForBehavior = aiBehaviorEvidence[behaviorId]
+    if (!evidenceForBehavior || evidenceForBehavior.length === 0) {
+      setSelectedContextEvidence(null)
+      setCurrentAIHighlights({})
+      return
+    }
+
+    // Filter interactions to only include those with evidence for this behavior
+    const relevantInteractionIds = new Set(evidenceForBehavior.map((e) => e.interactionId))
+    const filteredInteractions = allInteractions.filter((interaction) => relevantInteractionIds.has(interaction.id))
+
+    // Construct highlights object for the panel
+    const highlights: { [interactionId: string]: string[] } = {}
+    evidenceForBehavior.forEach((evidence) => {
+      highlights[evidence.interactionId] = evidence.segments
+    })
+
+    setCurrentAIHighlights(highlights)
+    if (filteredInteractions.length > 0) {
+      setSelectedContextEvidence(filteredInteractions[0])
+    } else {
+      setSelectedContextEvidence(null)
+    }
+  }
+
+  // Function to handle viewing raw interaction data
+  const handleViewInteraction = (interaction: Interaction) => {
+    setSelectedContextEvidence(interaction)
+
+    // In AI mode, show all AI highlights for this interaction's Key Action
+    if (isAIEnabled) {
+      // Find which Key Action this interaction belongs to
+      const parentKeyAction = assessment.competencies
+        .flatMap((comp) => comp.keyActions)
+        .find((ka) => ka.interactions.some((int) => int.id === interaction.id))
+
+      if (parentKeyAction) {
+        // Construct highlights for all behaviors in this Key Action
+        const allHighlights: { [interactionId: string]: string[] } = {}
+
+        Object.entries(aiBehaviorEvidence).forEach(([behaviorId, evidenceList]) => {
+          // Check if this behavior belongs to the current Key Action
+          const behaviorExists = barsChecklist[parentKeyAction.id]?.some((b) => b.id === behaviorId)
+          if (behaviorExists) {
+            evidenceList.forEach((evidence) => {
+              if (!allHighlights[evidence.interactionId]) {
+                allHighlights[evidence.interactionId] = []
+              }
+              allHighlights[evidence.interactionId].push(...evidence.segments)
+            })
+          }
+        })
+
+        setCurrentAIHighlights(allHighlights)
+      } else {
+        setCurrentAIHighlights({})
+      }
+    } else {
+      // In manual mode, no highlights
+      setCurrentAIHighlights({})
+    }
+  }
+
+  // Function to get "Diamati x kali" count - tracks assessor confirmations
+  const getObservedCount = (keyActionId: string, behaviorId: string): number => {
+    const keyActionSelections = barsSelections[keyActionId] || {}
+    let count = 0
+
+    Object.values(keyActionSelections).forEach((interactionSelections) => {
+      if (interactionSelections[behaviorId]) {
+        count++
+      }
+    })
+
+    return count
+  }
+
+  // Check if behavior has AI evidence (only used in AI mode)
+  const hasAIEvidence = (behaviorId: string): boolean => {
+    return isAIEnabled && aiBehaviorEvidence[behaviorId] && aiBehaviorEvidence[behaviorId].length > 0
+  }
+
   if (!participant) {
     return <div>Participant not found</div>
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Floating Sidebar */}
       <AssessorSidebar />
 
-      {/* Main Content */}
       <div className="pl-24">
-        {/* Top Header */}
         <AssessorHeader />
 
         <div className="flex items-center gap-4 my-4">
@@ -233,12 +428,38 @@ export default function RatingPage() {
           <h1 className="text-2xl font-bold text-gray-900">Assessment Rating</h1>
         </div>
 
+        {/* Assessment Mode Toggle */}
+        <div className="flex items-center justify-center mb-6">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-1">
+            <div className="flex">
+              <button
+                onClick={() => setIsAIEnabled(false)}
+                className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${
+                  !isAIEnabled
+                    ? "bg-slate-700 text-white shadow-sm"
+                    : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
+                }`}
+              >
+                Opsi 1: Penilaian Manual
+              </button>
+              <button
+                onClick={() => setIsAIEnabled(true)}
+                className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${
+                  isAIEnabled
+                    ? "bg-blue-600 text-white shadow-sm"
+                    : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
+                }`}
+              >
+                Opsi 2: Penilaian Dibantu AI
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Split-Pane Layout */}
         <div className="flex gap-6 h-[calc(100vh-200px)]">
-          {/* Main Content Area */}
           <div className={`${selectedContextEvidence ? "w-2/3" : "w-full"} transition-all duration-300`}>
             <div className="p-6 bg-white border border-gray-200 rounded-lg h-full overflow-y-auto">
-              {/* Page Header */}
               <div className="mb-8 flex justify-between items-center">
                 <p className="text-gray-600">
                   Disusun dari data simulasi untuk memberikan gambaran komprehensif terhadap kompetensi peserta.
@@ -273,11 +494,9 @@ export default function RatingPage() {
                     Evaluasi setiap kompetensi berdasarkan bukti perilaku yang terdeteksi.
                   </p>
 
-                  {/* Competencies Accordion */}
                   <div className="space-y-4">
                     {assessment.competencies.map((competency, index) => (
                       <div key={competency.id} className="border border-gray-200 rounded-lg">
-                        {/* Competency Header */}
                         <button
                           onClick={() => toggleCompetency(competency.id)}
                           className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors"
@@ -295,15 +514,12 @@ export default function RatingPage() {
                           )}
                         </button>
 
-                        {/* Competency Content */}
                         {expandedCompetencies.includes(competency.id) && (
                           <div className="border-t border-gray-200 p-6">
-                            {/* Definition */}
                             <div className="bg-blue-50 p-4 rounded-lg mb-6">
                               <p className="text-blue-800">{competency.definition}</p>
                             </div>
 
-                            {/* Key Actions Section */}
                             <h3 className="text-lg font-semibold text-gray-800 mb-2">Key Actions</h3>
                             <div className="space-y-6">
                               {competency.keyActions.map((keyAction, keyActionIndex) => (
@@ -317,7 +533,7 @@ export default function RatingPage() {
                                     <span className="text-base font-normal text-gray-600">{keyAction.description}</span>
                                   </h4>
 
-                                  {/* Raw Interactions Section - Vertical Layout */}
+                                  {/* Always show DATA SIMULASI YANG TERSEDIA section */}
                                   {keyAction.interactions.length > 0 && (
                                     <div className="mb-6">
                                       <h5 className="text-sm font-medium text-gray-700 mb-3 uppercase tracking-wide">
@@ -343,7 +559,7 @@ export default function RatingPage() {
                                               </div>
                                             </div>
                                             <button
-                                              onClick={() => setSelectedContextEvidence(interaction)}
+                                              onClick={() => handleViewInteraction(interaction)}
                                               className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                                                 selectedContextEvidence?.id === interaction.id
                                                   ? "bg-blue-600 text-white"
@@ -360,7 +576,89 @@ export default function RatingPage() {
                                     </div>
                                   )}
 
-                                  {/* BARS Checklist Section - Only visible if interactions exist */}
+                                  {/* AI Summary Section - Only in Opsi 2 */}
+                                  {isAIEnabled && keyAction.interactions.length > 0 && (
+                                    <div className="mb-6">
+                                      <h5 className="text-sm font-medium text-gray-700 mb-3 tracking-wide flex items-center gap-2">
+                                        <Sparkles size={16} className="text-blue-500" />
+                                        Ringkasan Temuan Evidence oleh AI:
+                                      </h5>
+                                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-200">
+                                        <div className="flex items-start mb-4">
+                                          <div className="flex-1">
+                                            {aiSummaries[keyAction.id as keyof typeof aiSummaries] && (
+                                              <div className="space-y-4">
+                                                {aiSummaries[keyAction.id as keyof typeof aiSummaries].strength.length >
+                                                  0 && (
+                                                  <div>
+                                                    <h6 className="font-semibold text-green-800 mb-2">
+                                                      🟢 Kekuatan Ditemukan (Strength):
+                                                    </h6>
+                                                    <ul className="list-disc list-inside space-y-1 ml-4">
+                                                      {aiSummaries[
+                                                        keyAction.id as keyof typeof aiSummaries
+                                                      ].strength.map((item, index) => (
+                                                        <li
+                                                          key={index}
+                                                          className="text-blue-800 text-sm leading-relaxed"
+                                                        >
+                                                          {item}
+                                                        </li>
+                                                      ))}
+                                                    </ul>
+                                                  </div>
+                                                )}
+
+                                                {aiSummaries[keyAction.id as keyof typeof aiSummaries].meetRequirement
+                                                  .length > 0 && (
+                                                  <div>
+                                                    <h6 className="font-semibold text-yellow-800 mb-2">
+                                                      🟡 Memenuhi Persyaratan (Meet Requirement):
+                                                    </h6>
+                                                    <ul className="list-disc list-inside space-y-1 ml-4">
+                                                      {aiSummaries[
+                                                        keyAction.id as keyof typeof aiSummaries
+                                                      ].meetRequirement.map((item, index) => (
+                                                        <li
+                                                          key={index}
+                                                          className="text-blue-800 text-sm leading-relaxed"
+                                                        >
+                                                          {item}
+                                                        </li>
+                                                      ))}
+                                                    </ul>
+                                                  </div>
+                                                )}
+
+                                                {aiSummaries[keyAction.id as keyof typeof aiSummaries].needsImprovement
+                                                  .length > 0 && (
+                                                  <div>
+                                                    <h6 className="font-semibold text-red-800 mb-2">
+                                                      🔴 Area untuk Peningkatan (Needs Improvement):
+                                                    </h6>
+                                                    <ul className="list-disc list-inside space-y-1 ml-4">
+                                                      {aiSummaries[
+                                                        keyAction.id as keyof typeof aiSummaries
+                                                      ].needsImprovement.map((item, index) => (
+                                                        <li
+                                                          key={index}
+                                                          className="text-blue-800 text-sm leading-relaxed"
+                                                        >
+                                                          {item}
+                                                        </li>
+                                                      ))}
+                                                    </ul>
+                                                  </div>
+                                                )}
+                                              </div>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* BARS Checklist Section */}
                                   {keyAction.interactions.length > 0 && barsChecklist[keyAction.id] && (
                                     <div className="bg-slate-50 p-6 rounded-lg border border-slate-200 mb-6">
                                       <div className="flex items-center gap-2 mb-4">
@@ -369,9 +667,9 @@ export default function RatingPage() {
                                         </h5>
                                       </div>
                                       <p className="text-sm text-slate-600 mb-6">
-                                        {selectedContextEvidence
-                                          ? "Centang perilaku yang ditunjukkan peserta dalam interaksi yang sedang dibuka."
-                                          : "Buka salah satu data simulasi untuk mulai menandai perilaku."}
+                                        {!isAIEnabled
+                                          ? "Centang perilaku yang ditunjukkan peserta berdasarkan review manual Anda terhadap data simulasi."
+                                          : "Centang perilaku yang ditunjukkan peserta. Item dengan tombol 'Lihat Bukti' telah diidentifikasi oleh AI."}
                                       </p>
 
                                       {/* Horizontal Tabs */}
@@ -411,15 +709,9 @@ export default function RatingPage() {
                                               behavior.level === (activeBarsTab[keyAction.id] || "strength"),
                                           )
                                           .map((behavior) => {
-                                            // Calculate total count for this behavior across all interactions
-                                            const totalCount = Object.values(barsSelections[keyAction.id] || {}).reduce(
-                                              (count, interactionSelections) => {
-                                                return count + (interactionSelections[behavior.id] ? 1 : 0)
-                                              },
-                                              0,
-                                            )
+                                            const observedCount = getObservedCount(keyAction.id, behavior.id)
+                                            const hasEvidence = hasAIEvidence(behavior.id)
 
-                                            // Check if this behavior is selected for the current interaction
                                             const isCheckedForCurrentInteraction =
                                               selectedContextEvidence &&
                                               barsSelections[keyAction.id]?.[selectedContextEvidence.id]?.[behavior.id]
@@ -434,7 +726,7 @@ export default function RatingPage() {
                                             return (
                                               <div
                                                 key={behavior.id}
-                                                className={`flex items-start gap-3 p-3 bg-white rounded-md border border-${tabColor}-200`}
+                                                className={`flex items-start gap-3 p-3 rounded-md border transition-all bg-white border-${tabColor}-200`}
                                               >
                                                 <div className="flex items-center gap-2">
                                                   <input
@@ -452,26 +744,47 @@ export default function RatingPage() {
                                                         )
                                                       }
                                                     }}
-                                                    className={`w-4 h-4 text-${tabColor}-600 border-gray-300 rounded focus:ring-${tabColor}-500 disabled:opacity-50`}
+                                                    className={`w-4 h-4 border-gray-300 rounded focus:ring-2 transition-colors text-${tabColor}-600 focus:ring-${tabColor}-500 disabled:opacity-50`}
                                                   />
                                                   <div
                                                     className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                                                      totalCount > 0
+                                                      observedCount > 0
                                                         ? `bg-${tabColor}-600 text-white`
                                                         : "bg-gray-200 text-gray-500"
                                                     }`}
                                                   >
-                                                    {totalCount}
+                                                    {observedCount}
                                                   </div>
                                                 </div>
                                                 <div className="flex-1">
                                                   <div className="text-sm text-gray-800">{behavior.description}</div>
-                                                  {totalCount > 0 && (
-                                                    <div className={`text-xs text-${tabColor}-600 mt-1`}>
-                                                      Diamati {totalCount} kali
+                                                  {/* AI suggestion label - separate from observed count */}
+                                                  {hasEvidence && (
+                                                    <div className="text-xs mt-1 text-blue-600 font-medium flex items-center gap-1">
+                                                      <Sparkles size={12} className="text-blue-500" />
+                                                      Disarankan oleh AI
+                                                    </div>
+                                                  )}
+                                                  {/* Observed count - tracks assessor confirmations only */}
+                                                  {observedCount > 0 && (
+                                                    <div className={`text-xs mt-1 text-${tabColor}-600`}>
+                                                      Diamati {observedCount} kali
                                                     </div>
                                                   )}
                                                 </div>
+                                                {/* "Lihat Bukti" button - only shown if AI has evidence */}
+                                                {hasEvidence && (
+                                                  <button
+                                                    onClick={() =>
+                                                      handleLihatBukti(behavior.id, keyAction.interactions)
+                                                    }
+                                                    className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
+                                                    title="Lihat bukti interaksi untuk perilaku ini"
+                                                  >
+                                                    <FileText size={12} />
+                                                    Lihat Bukti
+                                                  </button>
+                                                )}
                                               </div>
                                             )
                                           })}
@@ -479,7 +792,7 @@ export default function RatingPage() {
                                     </div>
                                   )}
 
-                                  {/* Assessor Rating Section - Only visible if interactions exist */}
+                                  {/* Assessor Rating Section */}
                                   {keyAction.interactions.length > 0 && (
                                     <div className="bg-gradient-to-r from-slate-50 to-gray-50 p-6 rounded-lg border border-gray-200">
                                       <div className="flex items-center gap-2 mb-2">
@@ -514,7 +827,6 @@ export default function RatingPage() {
                                         />
                                       </div>
 
-                                      {/* Save Key Action Button */}
                                       <div className="flex justify-end">
                                         <button
                                           onClick={() => saveKeyAction(competency.id, keyAction.id)}
@@ -530,7 +842,7 @@ export default function RatingPage() {
                               ))}
                             </div>
 
-                            {/* Rationale Section - Visually different */}
+                            {/* Rationale Section */}
                             <div className="bg-blue-50 p-6 rounded-lg border border-blue-200 mt-8">
                               <h4 className="font-medium mb-2 text-blue-900">
                                 Catatan Assessor untuk "{competency.title}"
@@ -601,16 +913,19 @@ export default function RatingPage() {
                 allInteractions={assessment.competencies.flatMap((comp) =>
                   comp.keyActions.flatMap((ka) => ka.interactions),
                 )}
+                isAIMode={isAIEnabled}
+                aiHighlights={currentAIHighlights}
+                aiBehaviorEvidence={aiBehaviorEvidence}
+                barsChecklist={barsChecklist}
               />
             </div>
           )}
         </div>
       </div>
 
-      {/* Keep the original ContextModal for backward compatibility if needed */}
       <ContextModal
         evidence={selectedContextEvidence!}
-        isOpen={false} // Always false since we're using the side panel now
+        isOpen={false}
         onClose={() => setSelectedContextEvidence(null)}
       />
     </div>

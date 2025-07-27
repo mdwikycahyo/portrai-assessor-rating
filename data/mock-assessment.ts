@@ -71,6 +71,72 @@ export const mockAssessment: Assessment = {
             "Menggunakan informasi ekonomi, keuangan, pasar, dan industri untuk mengidentifikasi tren, menilai strategi dan hasil bisnis saat ini, dan/atau mengevaluasi peluang bisnis tertentu; mengenali tren dan mengantisipasi dampaknya.",
           interactions: [
             {
+              id: "interaction-1",
+              type: "email",
+              title: "Interaksi Email: Penanganan Krisis Klien",
+              timestamp: "5 Juli 2025, 09:15",
+              participants: ["Manager AI", "John Doe"],
+              activityType: "Crisis Management",
+              contextTitle: "Krisis Klien - Penanganan Darurat",
+              simulationName: "Supply Chain Bottleneck", // New field
+              fullContext: `Email Thread: Krisis Klien
+
+Dari: Manager AI <manager@company.com>
+Kepada: John Doe <john.doe@company.com>
+Tanggal: 5 Juli 2025, 09:15
+Subjek: URGENT - Krisis Klien PT. Jaya Abadi
+
+John, kita ada masalah besar. Klien utama kita, PT. Jaya Abadi, melaporkan ada bug kritis di sistem kita. Tolong segera berikan rekomendasi.
+
+---
+
+Dari: John Doe <john.doe@company.com>
+Kepada: Manager AI <manager@company.com>
+Tanggal: 5 Juli 2025, 09:32
+Subjek: RE: URGENT - Krisis Klien PT. Jaya Abadi
+
+Terima kasih atas informasinya. Setelah melakukan analisis awal dari log error dan data penjualan Q3, saya melihat peluang besar untuk ekspansi ke segmen B2B. Saya merekomendasikan untuk menunda ekspansi ke segmen B2B hingga masalah ini terselesaikan.
+
+Langkah-langkah yang saya usulkan:
+1. Isolasi sistem yang bermasalah
+2. Komunikasi proaktif dengan klien
+3. Tim darurat untuk perbaikan dalam 2 jam
+
+---
+
+Dari: Manager AI <manager@company.com>
+Kepada: Manager AI <manager@company.com>
+Tanggal: 5 Juli 2025, 09:45
+Subjek: RE: URGENT - Krisis Klien PT. Jaya Abadi
+
+Baik, saya akan koordinasikan dengan tim teknis untuk penanganan darurat. Terima kasih atas analisis cepatnya.`,
+            },
+            {
+              id: "interaction-2",
+              type: "chat",
+              title: "Interaksi Group Chat: Diskusi Strategi Produk",
+              timestamp: "5 Juli 2025, 11:00",
+              participants: ["John Doe", "Team Lead", "Marketing Team"],
+              activityType: "Team Collaboration",
+              contextTitle: "Diskusi Strategi Produk Tim",
+              simulationName: "Performance Coaching", // New field
+              fullContext: `[11:00 AM] John Doe: Tim, saya baru saja meninjau laporan tren pasar terbaru. Data menunjukkan pergeseran signifikan dalam preferensi konsumen ke arah produk yang lebih ramah lingkungan.
+
+[11:02 AM] Team Lead: Itu menarik, John. Apa implikasinya bagi kita?
+
+[11:03 AM] Marketing Team: Setuju dengan John. Kami juga melihat tren serupa dari data customer feedback.
+
+[11:05 AM] John Doe: Saya rasa kita harus mempertimbangkan untuk mengembangkan lini produk baru yang berfokus pada keberlanjutan. Ini bisa menjadi peluang besar untuk menangkap pangsa pasar yang sedang berkembang.
+
+[11:06 AM] Team Lead: Bagaimana dengan timeline dan budget untuk ini?
+
+[11:07 AM] John Doe: Berdasarkan analisis kompetitor, kita punya window 6 bulan sebelum mereka masuk ke space ini. Budget estimasi sekitar 500K untuk R&D awal.
+
+[11:08 AM] Team Lead: Ide bagus. Mari kita jadwalkan pertemuan untuk membahas ini lebih lanjut dengan tim finance.
+
+[11:09 AM] Marketing Team: Saya akan siapkan market research yang lebih detail untuk mendukung proposal ini.`,
+            },
+            {
               id: "interaction-3",
               type: "document-creation", // Changed type to document-creation
               title: "Interaksi Membuat Dokumen: Laporan Analisis Efisiensi Biaya",
@@ -155,73 +221,7 @@ Yang paling penting adalah menerjemahkan data menjadi rekomendasi bisnis spesifi
 John Doe: Wah, makasih banyak ya! Ini sangat membantu buat proyek analisis pasar saya.
 
 AI Assistant: Sama-sama! Senang bisa membantu. Kalau ada pertanyaan lagi, jangan sungkan ya.`,
-            },
-            {
-              id: "interaction-1",
-              type: "email",
-              title: "Interaksi Email: Penanganan Krisis Klien",
-              timestamp: "5 Juli 2025, 09:15",
-              participants: ["Manager AI", "John Doe"],
-              activityType: "Crisis Management",
-              contextTitle: "Krisis Klien - Penanganan Darurat",
-              simulationName: "Supply Chain Bottleneck", // New field
-              fullContext: `Email Thread: Krisis Klien
-
-Dari: Manager AI <manager@company.com>
-Kepada: John Doe <john.doe@company.com>
-Tanggal: 5 Juli 2025, 09:15
-Subjek: URGENT - Krisis Klien PT. Jaya Abadi
-
-John, kita ada masalah besar. Klien utama kita, PT. Jaya Abadi, melaporkan ada bug kritis di sistem kita. Tolong segera berikan rekomendasi.
-
----
-
-Dari: John Doe <john.doe@company.com>
-Kepada: Manager AI <manager@company.com>
-Tanggal: 5 Juli 2025, 09:32
-Subjek: RE: URGENT - Krisis Klien PT. Jaya Abadi
-
-Terima kasih atas informasinya. Setelah melakukan analisis awal dari log error dan data penjualan Q3, saya melihat peluang besar untuk ekspansi ke segmen B2B. Saya merekomendasikan untuk menunda ekspansi ke segmen B2B hingga masalah ini terselesaikan.
-
-Langkah-langkah yang saya usulkan:
-1. Isolasi sistem yang bermasalah
-2. Komunikasi proaktif dengan klien
-3. Tim darurat untuk perbaikan dalam 2 jam
-
----
-
-Dari: Manager AI <manager@company.com>
-Kepada: Manager AI <manager@company.com>
-Tanggal: 5 Juli 2025, 09:45
-Subjek: RE: URGENT - Krisis Klien PT. Jaya Abadi
-
-Baik, saya akan koordinasikan dengan tim teknis untuk penanganan darurat. Terima kasih atas analisis cepatnya.`,
-            },
-            {
-              id: "interaction-2",
-              type: "chat",
-              title: "Interaksi Group Chat: Diskusi Strategi Produk",
-              timestamp: "5 Juli 2025, 11:00",
-              participants: ["John Doe", "Team Lead", "Marketing Team"],
-              activityType: "Team Collaboration",
-              contextTitle: "Diskusi Strategi Produk Tim",
-              simulationName: "Performance Coaching", // New field
-              fullContext: `[11:00 AM] John Doe: Tim, saya baru saja meninjau laporan tren pasar terbaru. Data menunjukkan pergeseran signifikan dalam preferensi konsumen ke arah produk yang lebih ramah lingkungan.
-
-[11:02 AM] Team Lead: Itu menarik, John. Apa implikasinya bagi kita?
-
-[11:03 AM] Marketing Team: Setuju dengan John. Kami juga melihat tren serupa dari data customer feedback.
-
-[11:05 AM] John Doe: Saya rasa kita harus mempertimbangkan untuk mengembangkan lini produk baru yang berfokus pada keberlanjutan. Ini bisa menjadi peluang besar untuk menangkap pangsa pasar yang sedang berkembang.
-
-[11:06 AM] Team Lead: Bagaimana dengan timeline dan budget untuk ini?
-
-[11:07 AM] John Doe: Berdasarkan analisis kompetitor, kita punya window 6 bulan sebelum mereka masuk ke space ini. Budget estimasi sekitar 500K untuk R&D awal.
-
-[11:08 AM] Team Lead: Ide bagus. Mari kita jadwalkan pertemuan untuk membahas ini lebih lanjut dengan tim finance.
-
-[11:09 AM] Marketing Team: Saya akan siapkan market research yang lebih detail untuk mendukung proposal ini.`,
-            },
+            }
           ],
           rating: undefined,
           ratingNote: "", // Initialize ratingNote
