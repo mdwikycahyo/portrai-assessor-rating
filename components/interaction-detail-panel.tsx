@@ -152,19 +152,9 @@ export function InteractionDetailPanel({
   const renderEmailInterface = (interaction: Interaction) => (
     <div className="bg-white rounded-lg border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
       <div className="p-4 border-b bg-blue-50 border-blue-200 transition-all duration-300">
-        <div className="flex items-center gap-3 mb-2">
+        <div className="flex items-center gap-3">
           <Mail size={20} className="text-blue-600" />
           <h3 className="font-semibold text-blue-900">{interaction.contextTitle}</h3>
-        </div>
-        <div className="flex items-center gap-4 text-sm text-blue-700">
-          <div className="flex items-center gap-1">
-            <Clock size={14} />
-            <span>{interaction.timestamp}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Users size={14} />
-            <span>{interaction.participants.join(", ")}</span>
-          </div>
         </div>
       </div>
 
@@ -227,19 +217,9 @@ export function InteractionDetailPanel({
   const renderChatInterface = (interaction: Interaction) => (
     <div className="bg-white rounded-lg border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
       <div className="p-4 border-b bg-green-50 border-green-200 transition-all duration-300">
-        <div className="flex items-center gap-3 mb-2">
+        <div className="flex items-center gap-3">
           <MessageCircle size={20} className="text-green-600" />
           <h3 className="font-semibold text-green-900">{interaction.contextTitle}</h3>
-        </div>
-        <div className="flex items-center gap-4 text-sm text-green-700">
-          <div className="flex items-center gap-1">
-            <Clock size={14} />
-            <span>{interaction.timestamp}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Users size={14} />
-            <span>{interaction.participants.join(", ")}</span>
-          </div>
         </div>
       </div>
 
@@ -364,19 +344,9 @@ export function InteractionDetailPanel({
   const renderDocumentCreationInterface = (interaction: Interaction) => (
     <div className="bg-white rounded-lg border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
       <div className="p-4 border-b bg-gray-50 border-gray-200 transition-all duration-300">
-        <div className="flex items-center gap-3 mb-2">
+        <div className="flex items-center gap-3">
           <FileText size={20} className="text-gray-600" />
           <h3 className="font-semibold text-gray-900">{interaction.contextTitle}</h3>
-        </div>
-        <div className="flex items-center gap-4 text-sm text-gray-700">
-          <div className="flex items-center gap-1">
-            <Clock size={14} />
-            <span>{interaction.timestamp}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Users size={14} />
-            <span>Penulis: {interaction.participants.join(", ")}</span>
-          </div>
         </div>
       </div>
 
@@ -419,19 +389,9 @@ export function InteractionDetailPanel({
   const renderChatbotInterface = (interaction: Interaction) => (
     <div className="bg-white rounded-lg border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
       <div className="p-4 border-b bg-orange-50 border-orange-200 transition-all duration-300">
-        <div className="flex items-center gap-3 mb-2">
+        <div className="flex items-center gap-3">
           <Bot size={20} className="text-orange-600" />
           <h3 className="font-semibold text-orange-900">{interaction.contextTitle}</h3>
-        </div>
-        <div className="flex items-center gap-4 text-sm text-orange-700">
-          <div className="flex items-center gap-1">
-            <Clock size={14} />
-            <span>{interaction.timestamp}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Users size={14} />
-            <span>{interaction.participants.join(", ")}</span>
-          </div>
         </div>
       </div>
 
@@ -505,19 +465,9 @@ export function InteractionDetailPanel({
   const renderCallInterface = (interaction: Interaction) => (
     <div className="bg-white rounded-lg border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
       <div className="p-4 border-b bg-indigo-50 border-indigo-200 transition-all duration-300">
-        <div className="flex items-center gap-3 mb-2">
+        <div className="flex items-center gap-3">
           <Phone size={20} className="text-indigo-600" />
           <h3 className="font-semibold text-indigo-900">{interaction.contextTitle}</h3>
-        </div>
-        <div className="flex items-center gap-4 text-sm text-indigo-700">
-          <div className="flex items-center gap-1">
-            <Clock size={14} />
-            <span>{interaction.timestamp}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Users size={14} />
-            <span>{interaction.participants.join(", ")}</span>
-          </div>
         </div>
       </div>
 
