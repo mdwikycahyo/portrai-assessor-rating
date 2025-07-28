@@ -8,6 +8,7 @@ export interface Interaction {
   activityType: string
   contextTitle: string
   simulationName: string // New property
+  readingSessions?: Array<{ openedAt: string; closedAt: string; durationMinutes: number }> // New property for documents
 }
 
 export interface KeyAction {
@@ -221,7 +222,7 @@ Yang paling penting adalah menerjemahkan data menjadi rekomendasi bisnis spesifi
 John Doe: Wah, makasih banyak ya! Ini sangat membantu buat proyek analisis pasar saya.
 
 AI Assistant: Sama-sama! Senang bisa membantu. Kalau ada pertanyaan lagi, jangan sungkan ya.`,
-            }
+            },
           ],
           rating: undefined,
           ratingNote: "", // Initialize ratingNote
@@ -241,11 +242,20 @@ AI Assistant: Sama-sama! Senang bisa membantu. Kalau ada pertanyaan lagi, jangan
               participants: ["John Doe"],
               activityType: "Document Review",
               contextTitle: "Review Laporan Keuangan Q2 2025",
-              simulationName: "CSR Project", // New field
+              simulationName: "CSR Project",
+              readingSessions: [
+                { openedAt: "8 Juli 2025, 09:00", closedAt: "8 Juli 2025, 09:03", durationMinutes: 3 },
+                { openedAt: "8 Juli 2025, 09:15", closedAt: "8 Juli 2025, 09:18", durationMinutes: 3 },
+                { openedAt: "8 Juli 2025, 09:25", closedAt: "8 Juli 2025, 09:27", durationMinutes: 2 },
+              ],
               fullContext: `DOCUMENT_TITLE: Laporan Keuangan Q2 2025.pdf
 DOCUMENT_OPENED: 8 Juli 2025, 09:00
-DOCUMENT_CLOSED: 8 Juli 2025, 09:10
-TOTAL_READING_TIME: 10 menit
+DOCUMENT_CLOSED: 8 Juli 2025, 09:03
+DOCUMENT_OPENED: 8 Juli 2025, 09:15
+DOCUMENT_CLOSED: 8 Juli 2025, 09:18
+DOCUMENT_OPENED: 8 Juli 2025, 09:25
+DOCUMENT_CLOSED: 8 Juli 2025, 09:27
+TOTAL_READING_TIME: 8 menit (3 sesi)
 
 DOCUMENT_CONTENT:
 EXECUTIVE SUMMARY

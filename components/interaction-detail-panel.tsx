@@ -37,6 +37,26 @@ export function InteractionDetailPanel({
     return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
   })
 
+  // Helper function to format date/time more concisely
+  const formatSessionTime = (openedAt: string, closedAt: string): string => {
+    // Extract date and time parts
+    const openParts = openedAt.split(", ")
+    const closeParts = closedAt.split(", ")
+
+    if (openParts.length === 2 && closeParts.length === 2) {
+      const [openDate, openTime] = openParts
+      const [closeDate, closeTime] = closeParts
+
+      // If same date, show condensed format
+      if (openDate === closeDate) {
+        return `${openDate}, ${openTime} - ${closeTime}`
+      }
+    }
+
+    // Fallback to original format if parsing fails or different dates
+    return `${openedAt} - ${closedAt}`
+  }
+
   const getSourceIcon = (type: Interaction["type"], size = 20) => {
     switch (type) {
       case "email":
@@ -266,11 +286,28 @@ export function InteractionDetailPanel({
     const documentTitle =
       lines.find((line) => line.startsWith("DOCUMENT_TITLE:"))?.replace("DOCUMENT_TITLE: ", "") ||
       interaction.contextTitle
-    const documentOpened = lines.find((line) => line.startsWith("DOCUMENT_OPENED:"))?.replace("DOCUMENT_OPENED: ", "")
-    const documentClosed = lines.find((line) => line.startsWith("DOCUMENT_CLOSED:"))?.replace("DOCUMENT_CLOSED: ", "")
-    const readingTime = lines
-      .find((line) => line.startsWith("TOTAL_READING_TIME:"))
-      ?.replace("TOTAL_READING_TIME: ", "")
+
+    // Use readingSessions if available, otherwise fall back to parsing from fullContext
+    let readingSessions = interaction.readingSessions
+    let totalReadingTime = ""
+
+    if (!readingSessions) {
+      // Fallback: parse from fullContext for backward compatibility
+      const documentOpened = lines.find((line) => line.startsWith("DOCUMENT_OPENED:"))?.replace("DOCUMENT_OPENED: ", "")
+      const documentClosed = lines.find((line) => line.startsWith("DOCUMENT_CLOSED:"))?.replace("DOCUMENT_CLOSED: ", "")
+      const readingTime = lines
+        .find((line) => line.startsWith("TOTAL_READING_TIME:"))
+        ?.replace("TOTAL_READING_TIME: ", "")
+
+      if (documentOpened && documentClosed) {
+        readingSessions = [{ openedAt: documentOpened, closedAt: documentClosed, durationMinutes: 0 }]
+      }
+      totalReadingTime = readingTime || ""
+    } else {
+      // Calculate total reading time from sessions
+      const totalMinutes = readingSessions.reduce((sum, session) => sum + session.durationMinutes, 0)
+      totalReadingTime = `${totalMinutes} menit (${readingSessions.length} sesi)`
+    }
 
     const contentStartIndex = lines.findIndex((line) => line.trim() === "DOCUMENT_CONTENT:")
     const documentContent =
@@ -283,24 +320,28 @@ export function InteractionDetailPanel({
             <FileText size={20} className="text-purple-600" />
             <h3 className="font-semibold text-purple-900">{documentTitle}</h3>
           </div>
-          <div className="grid grid-cols-1 gap-2 text-sm text-purple-700">
-            {documentOpened && (
-              <div className="flex items-center gap-1">
-                <Clock size={14} />
-                <span>Dibuka: {documentOpened}</span>
-              </div>
-            )}
-            {documentClosed && (
-              <div className="flex items-center gap-1">
-                <Clock size={14} />
-                <span>Ditutup: {documentClosed}</span>
-              </div>
-            )}
-            {readingTime && (
-              <div className="flex items-center gap-1">
-                <Users size={14} />
-                <span>Durasi Membaca: {readingTime}</span>
-              </div>
+          <div className="space-y-2 text-sm text-purple-700">
+            {readingSessions && readingSessions.length > 0 && (
+              <>
+                <div className="font-medium">Sesi Membaca:</div>
+                {readingSessions.map((session, index) => (
+                  <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 ml-2">
+                    <div className="flex items-center gap-1 min-w-0">
+                      <Clock size={14} className="flex-shrink-0" />
+                      <span className="text-xs sm:text-sm">
+                        Sesi {index + 1}: {formatSessionTime(session.openedAt, session.closedAt)}
+                      </span>
+                    </div>
+                    <div className="text-xs bg-purple-100 px-2 py-1 rounded self-start sm:self-auto flex-shrink-0">
+                      {session.durationMinutes} menit
+                    </div>
+                  </div>
+                ))}
+                <div className="flex items-center gap-1 font-medium border-t border-purple-200 pt-2">
+                  <Users size={14} />
+                  <span>Total Durasi Membaca: {totalReadingTime}</span>
+                </div>
+              </>
             )}
           </div>
         </div>
