@@ -38,7 +38,7 @@ export default function RatingPage() {
   }>({})
   const [currentAIHighlights, setCurrentAIHighlights] = useState<{ [interactionId: string]: string[] }>({})
 
-  const [isAIEnabled, setIsAIEnabled] = useState(false)
+  const [isAIEnabled, setIsAIEnabled] = useState(true)
 
   // Simulated AI-generated summaries for demonstration - only used in Opsi 2
   const aiSummaries = {
