@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Next.js 15 application called "PortrAI Assessor" - a mockup for an assessment rating system where assessors can evaluate participants. The app uses React 19, TypeScript, and Tailwind CSS with shadcn/ui components.
+This is a Next.js 15 application called "PortrAI Assessor" - a comprehensive assessment rating system where assessors evaluate participants using BARS (Behaviorally Anchored Rating Scales). The app uses React 19, TypeScript, and Tailwind CSS with shadcn/ui components, featuring AI-powered evidence analysis and interactive rating workflows.
 
 ## Commands
 
@@ -22,42 +22,61 @@ This project uses `pnpm` as the package manager (evidenced by `pnpm-lock.yaml`).
 ### Application Structure
 - **App Router**: Uses Next.js 15 App Router pattern with `app/` directory
 - **Route Structure**:
-  - `/` - Main dashboard (participant listing)
-  - `/rating/[id]` - Rating page for specific participants
+  - `/` - Single-page assessment rating interface (hardcoded to participant ID "1")
 - **Component Organization**:
   - `components/ui/` - shadcn/ui components (automatically generated)
   - `components/` - Custom application components
+  - `components/assessment/` - Assessment-specific components (AssessmentSummaryCard, AISummarySection, BarsChecklistSection, OverallSummarySection)
   - `data/` - Mock data and type definitions
-  - `hooks/` - Custom React hooks
+  - `hooks/` - Custom React hooks (useRatingCalculation)
   - `lib/` - Utility functions
-  - `styles/` - Global styles
+  - `utils/` - Helper utilities (interaction-utils, rating-utils)
 
 ### Key Data Models
 Located in `data/` directory:
-- **Participant**: Assessment participants with status tracking
-- **Assessment**: Complete assessment structure with competencies
-- **Competency**: Skills/areas being evaluated  
-- **KeyAction**: Specific actions within competencies
-- **Interaction**: User interactions (email, chat, documents, calls, etc.)
+- **Participant**: Assessment participants from mock-participants.ts
+- **Assessment**: Complete assessment structure with competencies (mock-assessment.ts)
+- **Competency**: Skills/areas being evaluated with Key Actions
+- **KeyAction**: Specific actions within competencies with interactions and rating notes
+- **Interaction**: User interactions (email, chat, document, chatbot, call, document-creation)
+- **BARS Checklist**: Behaviorally Anchored Rating Scale items (bars-checklist.ts)
+- **AI Summaries**: AI-generated evidence summaries (ai-summaries.ts)
+- **AI Behavior Evidence**: AI-identified behavioral evidence with highlighted segments (ai-behavior-evidence.ts)
+
+### Core Features & Functionality
+1. **Single-Page Assessment Interface**: Comprehensive rating page for participant evaluation
+2. **BARS Rating System**: Behaviorally Anchored Rating Scales with strength/meet-requirement/need-improvement levels
+3. **AI Evidence Analysis**: 
+   - AI-powered behavioral evidence detection
+   - Segment highlighting in interactions
+   - Automated evidence-to-behavior mapping
+   - AI-generated summaries by rating category
+4. **Interactive Evidence Panel**: Side panel for viewing detailed interaction data with AI highlights
+5. **Dynamic Rating Calculation**: Real-time rating calculation using custom hook (useRatingCalculation)
+6. **Assessor Notes & Rationale**: Text areas for assessor commentary and justification
+7. **Evidence Navigation**: "Lihat Bukti" (View Evidence) buttons linking behaviors to supporting interactions
 
 ### State Management
-- Uses React's built-in state management (useState, useMemo)
+- Uses React's built-in state management (useState, useEffect, useMemo)
+- Complex state for BARS selections: `{ [keyActionId: string]: { [interactionId: string]: { [behaviorId: string]: boolean } } }`
+- AI highlights state for evidence visualization
 - No external state management library
-- Mock data simulates real application behavior
+- Custom hook `useRatingCalculation` for rating logic
 
 ### Styling & UI
 - **Tailwind CSS**: Primary styling framework with custom configuration
-- **shadcn/ui**: Component library for consistent UI elements
+- **shadcn/ui**: Component library for consistent UI elements  
 - **Radix UI**: Headless components underlying shadcn/ui
 - **Design System**: Uses CSS custom properties for theming
-- **Color Safelist**: Tailwind config includes safelist for dynamic bg/text/border colors
+- **Color Safelist**: Tailwind config includes safelist for dynamic bg/text/border colors (red/green/yellow/blue variants)
+- **Custom Sidebar**: Fixed-position assessor sidebar with logo
 
-### Key Features
-1. **Participant Dashboard**: Filtering, searching, and pagination of participants
-2. **Rating System**: BARS (Behaviorally Anchored Rating Scales) based assessment
-3. **AI Integration**: Simulated AI-generated summaries and insights
-4. **Interaction Analysis**: Various interaction types (email, chat, documents, calls)
-5. **Evidence Collection**: Context modal for viewing detailed interactions
+### Key Components Architecture
+- **AssessorSidebar**: Fixed navigation sidebar with logo
+- **AssessorHeader**: Main header component
+- **InteractionDetailPanel**: Complex side panel for evidence viewing with AI highlighting
+- **Assessment Components**: Modular assessment sections (AssessmentSummaryCard, AISummarySection, BarsChecklistSection, OverallSummarySection)
+- **ContextModal**: Modal for evidence viewing (currently unused in main interface)
 
 ### Configuration Notes
 - **Build Configuration**: Ignores ESLint and TypeScript errors during builds (development setup)
@@ -69,10 +88,13 @@ Located in `data/` directory:
 - Components use "use client" directive for client-side functionality
 - Extensive use of React hooks (useState, useEffect, useMemo)
 - Mock data provides realistic development environment
-- Responsive design with mobile considerations
+- Responsive design with split-pane layout (2/3 main, 1/3 detail panel)
 - Icon usage via Lucide React library
+- Complex nested state management for BARS selections
+- AI evidence integration with behavioral mapping
 
 ### File Naming Conventions
-- Components: PascalCase (e.g., `AssessorSidebar`)
+- Components: PascalCase (e.g., `AssessorSidebar`, `InteractionDetailPanel`)
 - Pages: lowercase with extensions (e.g., `page.tsx`)
-- Data files: kebab-case with descriptive names (e.g., `mock-participants.ts`)
+- Data files: kebab-case with descriptive names (e.g., `ai-behavior-evidence.ts`)
+- Hooks: camelCase with "use" prefix (e.g., `useRatingCalculation.ts`)
