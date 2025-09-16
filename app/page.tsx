@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Save, Sparkles } from "lucide-react"
 
 // New stimulus-response imports
 import { mockSimulations } from "../data/mock-simulations"
@@ -10,10 +9,13 @@ import { SimulationData } from "../data/stimulus-response-types"
 import { ParticipantSimulationHeader } from "../components/ParticipantSimulationHeader"
 import { StimulusResponseChain } from "../components/StimulusResponseChain"
 import { CollapsibleReferencePanel } from "../components/CollapsibleReferencePanel"
+import { KeyActionRatingCard } from "../components/KeyActionRatingCard"
 
 // Existing components to preserve
 import { AssessorSidebar } from "../components/assessor-sidebar"
 import { barsChecklist } from "../data/bars-checklist"
+import { getCompetenciesForSimulation } from "../data/competency-mappings"
+import { HierarchicalBARSData } from "../data/stimulus-response-types"
 
 export default function RatingPage() {
   // Hardcode participant ID to "1"
@@ -42,41 +44,70 @@ export default function RatingPage() {
   }
 
 
-  const handleAssessorNotesUpdate = (notes: string) => {
+  const handleAssessorNotesUpdate = (keyActionId: string, notes: string) => {
     if (!activeSimulation) return
 
-    // Update assessor notes for current simulation
-    console.log("Updating assessor notes:", notes)
-    // TODO: Implement state update for assessor notes
+    // Update assessor notes for specific key action
+    console.log("Updating assessor notes for", keyActionId, ":", notes)
+    // TODO: Implement state update for key action specific assessor notes
   }
 
-  const handleRatingOverride = (rating: 'strength' | 'meet-requirement' | 'need-improvement') => {
+  const handleRatingOverride = (keyActionId: string, rating: 'strength' | 'meet-requirement' | 'need-improvement') => {
     if (!activeSimulation) return
 
-    console.log("Overriding AI rating:", rating)
-    // TODO: Implement rating override functionality
+    console.log("Overriding AI rating for", keyActionId, ":", rating)
+    // TODO: Implement key action specific rating override functionality
   }
 
-  const handleSaveRating = () => {
+  const handleSaveRating = (keyActionId: string) => {
     if (!activeSimulation) return
 
-    console.log("Saving rating for simulation:", activeSimulation.id)
-    alert("Rating saved successfully!")
+    console.log("Saving rating for key action:", keyActionId, "in simulation:", activeSimulation.id)
+    alert(`Penilaian untuk Key Action ${keyActionId} berhasil disimpan!`)
   }
 
-  // Get BARS items for current simulation (from existing checklist)
-  const getCurrentBARSItems = () => {
-    if (!activeSimulation) return []
+  // Get hierarchical BARS data for current simulation
+  const getHierarchicalBARSData = (): HierarchicalBARSData => {
+    if (!activeSimulation) return { competencies: [] }
 
-    // Convert existing BARS checklist format to new format
-    const allItems = Object.entries(barsChecklist).flatMap(([, behaviors]) =>
-      behaviors.map(behavior => ({
-        id: behavior.id,
-        description: behavior.description,
-        level: behavior.level as 'strength' | 'meet-requirement' | 'need-improvement'
+    const competencies = getCompetenciesForSimulation(activeSimulation.id)
+
+    return {
+      competencies: competencies.map(competency => ({
+        competencyId: competency.id,
+        competencyTitle: competency.title,
+        competencyDefinition: competency.definition,
+        keyActions: competency.keyActions
+          .filter(keyAction => activeSimulation.availableBARS[keyAction.id]) // Only include key actions available in simulation
+          .map(keyAction => {
+            const behaviors = barsChecklist[keyAction.id] || []
+
+            return {
+              keyActionId: keyAction.id,
+              keyActionTitle: keyAction.title,
+              keyActionCode: keyAction.code,
+              keyActionDescription: keyAction.description,
+              behaviors: {
+                strength: behaviors.filter(b => b.level === 'strength').map(b => ({
+                  id: b.id,
+                  description: b.description,
+                  level: b.level as 'strength' | 'meet-requirement' | 'need-improvement'
+                })),
+                'meet-requirement': behaviors.filter(b => b.level === 'meet-requirement').map(b => ({
+                  id: b.id,
+                  description: b.description,
+                  level: b.level as 'strength' | 'meet-requirement' | 'need-improvement'
+                })),
+                'need-improvement': behaviors.filter(b => b.level === 'need-improvement').map(b => ({
+                  id: b.id,
+                  description: b.description,
+                  level: b.level as 'strength' | 'meet-requirement' | 'need-improvement'
+                }))
+              }
+            }
+          })
       }))
-    )
-    return allItems
+    }
   }
 
   // Update expanded state for stimulus-response chains
@@ -125,9 +156,43 @@ export default function RatingPage() {
                     <h2 className="text-xl font-semibold text-gray-900 mb-2">
                       {activeSimulation.name}
                     </h2>
-                    <p className="text-gray-600">
+                    <p className="text-gray-600 mb-4">
                       Tinjau rangkaian interaksi di bawah ini untuk menilai perilaku partisipan.
                     </p>
+
+                    {/* Competencies Being Measured */}
+                    {(() => {
+                      const competencies = getCompetenciesForSimulation(activeSimulation.id)
+                      if (competencies.length > 0) {
+                        return (
+                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <h3 className="font-semibold text-blue-900 mb-2">
+                              Kompetensi yang Diukur:
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {competencies.map((competency) => (
+                                <div key={competency.id} className="bg-white border border-blue-100 rounded p-3">
+                                  <h4 className="font-medium text-blue-800 mb-1">
+                                    {competency.title}
+                                  </h4>
+                                  <div className="text-xs text-blue-600 space-y-1">
+                                    {competency.keyActions.map((keyAction) => (
+                                      <div key={keyAction.id} className="flex items-center gap-2">
+                                        <span className="inline-flex items-center justify-center w-6 h-4 bg-blue-100 text-blue-800 text-xs font-medium rounded">
+                                          {keyAction.code}
+                                        </span>
+                                        <span>{keyAction.title}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )
+                      }
+                      return null
+                    })()}
                   </div>
 
                   {/* Stimulus-Response Chains */}
@@ -146,76 +211,27 @@ export default function RatingPage() {
                       ))}
                   </div>
 
-                  {/* AI Assessment Rating Section */}
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-200">
-                    <div className="flex items-center gap-2 mb-4">
-                      <Sparkles className="w-5 h-5 text-blue-600" />
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        Key Action Assessment
-                      </h3>
+                  {/* Key Action Rating Cards */}
+                  <div className="space-y-6">
+                    <div className="mb-4">
+                      <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                        Penilaian Key Action
+                      </h2>
+                      <p className="text-gray-600">
+                        Tinjau rekomendasi dari AI dan berikan penilaian Anda untuk setiap Key Action yang diukur dalam simulasi ini.
+                      </p>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {/* AI Recommendation */}
-                      <div>
-                        <h4 className="font-medium text-gray-900 mb-2">AI Recommendation:</h4>
-                        <div className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${
-                          activeSimulation.keyActionRating.aiRecommendation === "strength"
-                            ? "bg-green-100 text-green-800"
-                            : activeSimulation.keyActionRating.aiRecommendation === "meet-requirement"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-red-100 text-red-800"
-                        }`}>
-                          {activeSimulation.keyActionRating.aiRecommendation === "strength" && "Strength"}
-                          {activeSimulation.keyActionRating.aiRecommendation === "meet-requirement" && "Meet Requirement"}
-                          {activeSimulation.keyActionRating.aiRecommendation === "need-improvement" && "Need Improvement"}
-                        </div>
-
-                        <div className="mt-3 p-3 bg-white rounded-md border">
-                          <p className="text-sm text-gray-700">
-                            {activeSimulation.keyActionRating.aiReasoning}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Assessor Override */}
-                      <div>
-                        <h4 className="font-medium text-gray-900 mb-2">Assessor Override:</h4>
-                        <select
-                          className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          defaultValue={activeSimulation.keyActionRating.aiRecommendation}
-                          onChange={(e) => handleRatingOverride(e.target.value as any)}
-                        >
-                          <option value="strength">Strength</option>
-                          <option value="meet-requirement">Meet Requirement</option>
-                          <option value="need-improvement">Need Improvement</option>
-                        </select>
-
-                        <div className="mt-3">
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Assessor Notes (Required):
-                          </label>
-                          <textarea
-                            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            rows={3}
-                            placeholder="Provide detailed rationale for your assessment..."
-                            value={activeSimulation.keyActionRating.assessorNotes}
-                            onChange={(e) => handleAssessorNotesUpdate(e.target.value)}
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Save Button */}
-                    <div className="flex justify-end mt-6">
-                      <button
-                        onClick={handleSaveRating}
-                        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md transition-colors"
-                      >
-                        <Save className="w-4 h-4" />
-                        Save Assessment
-                      </button>
-                    </div>
+                    {/* Render individual KeyActionRatingCard for each key action */}
+                    {Object.entries(activeSimulation.keyActionRatings).map(([keyActionId, rating]) => (
+                      <KeyActionRatingCard
+                        key={keyActionId}
+                        rating={rating}
+                        onRatingOverride={handleRatingOverride}
+                        onAssessorNotesUpdate={handleAssessorNotesUpdate}
+                        onSaveRating={handleSaveRating}
+                      />
+                    ))}
                   </div>
                 </>
               ) : (
@@ -228,7 +244,7 @@ export default function RatingPage() {
 
           {/* Collapsible Reference Panel */}
           <CollapsibleReferencePanel
-            barsItems={getCurrentBARSItems()}
+            barsData={getHierarchicalBARSData()}
             isCollapsed={isReferencePanelCollapsed}
             onToggleCollapse={() => setIsReferencePanelCollapsed(!isReferencePanelCollapsed)}
           />

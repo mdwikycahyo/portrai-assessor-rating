@@ -1,30 +1,42 @@
 "use client"
 
 import { useState } from "react"
-import { ChevronLeft, ChevronRight, BookOpen, CheckCircle } from "lucide-react"
-
-interface BARSItem {
-  id: string
-  description: string
-  level: 'strength' | 'meet-requirement' | 'need-improvement'
-}
+import { ChevronLeft, ChevronRight, BookOpen, CheckCircle, ChevronDown, ChevronUp } from "lucide-react"
+import { HierarchicalBARSData } from "../data/stimulus-response-types"
 
 interface CollapsibleReferencePanelProps {
-  barsItems: BARSItem[]
+  barsData: HierarchicalBARSData
   isCollapsed: boolean
   onToggleCollapse: () => void
 }
 
 export function CollapsibleReferencePanel({
-  barsItems,
+  barsData,
   isCollapsed,
   onToggleCollapse
 }: CollapsibleReferencePanelProps) {
-  // Group BARS items by level
-  const groupedBARS = {
-    strength: barsItems.filter(item => item.level === 'strength'),
-    'meet-requirement': barsItems.filter(item => item.level === 'meet-requirement'),
-    'need-improvement': barsItems.filter(item => item.level === 'need-improvement')
+  // State for collapsible sections - initialize with all competencies expanded for better UX
+  const [expandedCompetencies, setExpandedCompetencies] = useState<{ [key: string]: boolean }>(() => {
+    const initial: { [key: string]: boolean } = {}
+    barsData.competencies.forEach(competency => {
+      initial[competency.competencyId] = true // Start with competencies expanded
+    })
+    return initial
+  })
+  const [expandedKeyActions, setExpandedKeyActions] = useState<{ [key: string]: boolean }>({})
+
+  const toggleCompetency = (competencyId: string) => {
+    setExpandedCompetencies(prev => ({
+      ...prev,
+      [competencyId]: !prev[competencyId]
+    }))
+  }
+
+  const toggleKeyAction = (keyActionId: string) => {
+    setExpandedKeyActions(prev => ({
+      ...prev,
+      [keyActionId]: !prev[keyActionId]
+    }))
   }
 
   // Get level color
@@ -98,40 +110,106 @@ export function CollapsibleReferencePanel({
       {/* Content */}
       {!isCollapsed && (
         <div className="p-4 overflow-y-auto h-[calc(100%-73px)]">
-          {/* BARS Categories */}
-          <div className="space-y-6">
-            {Object.entries(groupedBARS).map(([level, items]) => {
-              if (items.length === 0) return null
-
-              return (
-                <div key={level}>
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-lg">{getLevelIcon(level)}</span>
-                    <h4 className={`font-semibold ${getLevelColor(level)}`}>
-                      {getLevelLabel(level)}
-                    </h4>
+          {/* Hierarchical BARS Structure */}
+          <div className="space-y-4">
+            {barsData.competencies.map((competency) => (
+              <div key={competency.competencyId} className="border border-gray-200 rounded-lg">
+                {/* Competency Header */}
+                <button
+                  onClick={() => toggleCompetency(competency.competencyId)}
+                  className="w-full flex items-center justify-between p-3 bg-slate-50 hover:bg-slate-100 rounded-t-lg transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-slate-800 text-left">
+                      {competency.competencyTitle}
+                    </h3>
                   </div>
+                  {expandedCompetencies[competency.competencyId] ? (
+                    <ChevronUp className="w-4 h-4 text-gray-600" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-gray-600" />
+                  )}
+                </button>
 
-                  <div className="space-y-2 ml-6">
-                    {items.map((item) => (
-                      <div
-                        key={item.id}
-                        className="flex items-start gap-2 p-2 rounded-md hover:bg-gray-50 transition-colors"
-                      >
-                        <CheckCircle className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                        <p className="text-sm text-gray-800 leading-relaxed">
-                          {item.description}
-                        </p>
-                      </div>
-                    ))}
+                {/* Competency Content */}
+                {expandedCompetencies[competency.competencyId] && (
+                  <div className="p-3">
+                    <p className="text-xs text-gray-600 mb-4">{competency.competencyDefinition}</p>
+
+                    {/* Key Actions */}
+                    <div className="space-y-3">
+                      {competency.keyActions.map((keyAction) => (
+                        <div key={keyAction.keyActionId} className="border border-gray-100 rounded-md">
+                          {/* Key Action Header */}
+                          <button
+                            onClick={() => toggleKeyAction(keyAction.keyActionId)}
+                            className="w-full flex items-center justify-between p-3 bg-blue-50 hover:bg-blue-100 rounded-t-md transition-colors"
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className="inline-flex items-center justify-center w-8 h-5 bg-blue-100 text-blue-800 text-xs font-medium rounded">
+                                {keyAction.keyActionCode}
+                              </span>
+                              <h4 className="font-medium text-blue-900 text-left">
+                                {keyAction.keyActionTitle}
+                              </h4>
+                            </div>
+                            {expandedKeyActions[keyAction.keyActionId] ? (
+                              <ChevronUp className="w-4 h-4 text-blue-600" />
+                            ) : (
+                              <ChevronDown className="w-4 h-4 text-blue-600" />
+                            )}
+                          </button>
+
+                          {/* Key Action Content */}
+                          {expandedKeyActions[keyAction.keyActionId] && (
+                            <div className="p-3 bg-white">
+                              <p className="text-xs text-gray-600 mb-3">{keyAction.keyActionDescription}</p>
+
+                              {/* BARS Behaviors by Level */}
+                              <div className="space-y-4">
+                                {(['strength', 'meet-requirement', 'need-improvement'] as const).map((level) => {
+                                  const behaviors = keyAction.behaviors[level]
+                                  if (behaviors.length === 0) return null
+
+                                  return (
+                                    <div key={level}>
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <span className="text-sm">{getLevelIcon(level)}</span>
+                                        <h5 className={`font-medium text-sm ${getLevelColor(level)}`}>
+                                          {getLevelLabel(level)}
+                                        </h5>
+                                      </div>
+
+                                      <div className="space-y-1 ml-6">
+                                        {behaviors.map((behavior) => (
+                                          <div
+                                            key={behavior.id}
+                                            className="flex items-start gap-2 p-2 rounded-md hover:bg-gray-50 transition-colors"
+                                          >
+                                            <CheckCircle className="w-3 h-3 text-gray-400 mt-0.5 flex-shrink-0" />
+                                            <p className="text-xs text-gray-700 leading-relaxed">
+                                              {behavior.description}
+                                            </p>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )
-            })}
+                )}
+              </div>
+            ))}
           </div>
 
           {/* Empty State */}
-          {barsItems.length === 0 && (
+          {barsData.competencies.length === 0 && (
             <div className="text-center py-8">
               <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-3" />
               <p className="text-gray-500 text-sm">

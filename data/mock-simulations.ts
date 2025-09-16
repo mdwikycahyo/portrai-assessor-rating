@@ -5,16 +5,84 @@ import { SimulationData } from "./stimulus-response-types";
 
 export const mockSimulations: SimulationData[] = [
   {
-    id: "business-analysis",
+    id: "business-analysis-swot",
     name: "Business Analysis (SWOT)",
     isCompleted: false,
-    availableBARS: {},
-    keyActionRating: {
-      aiRecommendation: "strength",
-      aiReasoning:
-        "Participant demonstrates excellent SWOT analysis skills through systematic evaluation of sponsorship opportunity. Shows strong stakeholder engagement, strategic thinking, and collaborative decision-making approach with cross-functional teams.",
-      assessorNotes: "",
-      isDraft: true,
+    availableBARS: {
+      "memahami-fungsi-bisnis": true,
+      "menganalisis": true,
+      "mengintegrasikan": true,
+      "komunikasi-terbuka": true,
+      "menunjukkan-kontribusi": true,
+      "membangun-hubungan": true
+    },
+    keyActionRatings: {
+      "memahami-fungsi-bisnis": {
+        keyActionId: "memahami-fungsi-bisnis",
+        keyActionTitle: "Memahami Fungsi dan Proses Bisnis",
+        keyActionCode: "BA1",
+        competencyTitle: "Business Acumen",
+        aiRecommendation: "need-improvement",
+        aiReasoning: "Tidak ditemukan bukti yang cukup untuk memberikan rekomendasi penilaian pada Key Action ini. Partisipan tidak menunjukkan pemahaman eksplisit tentang fungsi bisnis utama, proses organisasi, atau bagaimana berbagai departemen bekerja sama dalam interaksi yang diamati. Assessor perlu menilai berdasarkan observasi langsung atau bukti tambahan.",
+        assessorNotes: "",
+        isDraft: true,
+        hasEvidence: false,
+      },
+      "menganalisis": {
+        keyActionId: "menganalisis",
+        keyActionTitle: "Menganalisis",
+        keyActionCode: "BA2",
+        competencyTitle: "Business Acumen",
+        aiRecommendation: "strength",
+        aiReasoning: "Partisipan menunjukkan kemampuan analitis yang sangat baik dengan melakukan analisis SWOT yang komprehensif terhadap peluang sponsorship S24. Secara sistematis mengevaluasi Kekuatan (5000+ peserta, kesesuaian industri), Kelemahan (biaya tinggi, alokasi sumber daya), Peluang (brand awareness, lead generation), dan Ancaman (ketidakpastian ROI, kehadiran kompetitor). Menggunakan data ekonomi (analisis cost-benefit) dan insight pasar untuk memberikan rekomendasi bisnis yang actionable.",
+        assessorNotes: "",
+        isDraft: true,
+        hasEvidence: true,
+      },
+      "mengintegrasikan": {
+        keyActionId: "mengintegrasikan",
+        keyActionTitle: "Mengintegrasikan",
+        keyActionCode: "BA3",
+        competencyTitle: "Business Acumen",
+        aiRecommendation: "strength",
+        aiReasoning: "Partisipan berhasil mengintegrasikan data dari berbagai sumber termasuk dokumen proposal event, riset pasar, dan feedback stakeholder untuk membentuk penilaian bisnis yang komprehensif. Menghubungkan implikasi finansial dengan positioning strategis, mengintegrasikan insight tim marketing dengan pertimbangan operasional, dan mensintesis perspektif cross-functional untuk mengidentifikasi faktor-faktor keputusan kritis bagi kesuksesan organisasi.",
+        assessorNotes: "",
+        isDraft: true,
+        hasEvidence: true,
+      },
+      "komunikasi-terbuka": {
+        keyActionId: "komunikasi-terbuka",
+        keyActionTitle: "Komunikasi Terbuka",
+        keyActionCode: "EC1",
+        competencyTitle: "Establishing Collaboration",
+        aiRecommendation: "strength",
+        aiReasoning: "Partisipan menunjukkan komunikasi yang jelas dan persuasif melalui berbagai saluran. Secara efektif mengartikulasikan temuan analisis bisnis yang kompleks kepada berbagai stakeholder, menyesuaikan gaya komunikasi untuk audiens yang berbeda (production manager vs tim marketing), memberikan respons yang terstruktur dan beralasan, serta menjaga transparansi tentang proses analisis dan persyaratan timeline.",
+        assessorNotes: "",
+        isDraft: true,
+        hasEvidence: true,
+      },
+      "menunjukkan-kontribusi": {
+        keyActionId: "menunjukkan-kontribusi",
+        keyActionTitle: "Menunjukkan Kontribusi",
+        keyActionCode: "EC2",
+        competencyTitle: "Establishing Collaboration",
+        aiRecommendation: "meet-requirement",
+        aiReasoning: "Partisipan menunjukkan perilaku kolaboratif yang baik dengan secara proaktif melibatkan tim marketing untuk perencanaan implementasi dan memberikan analisis yang menyeluruh ketika diminta. Namun, kontribusi sebagian besar bersifat reaktif daripada proaktif - merespons permintaan dengan baik tetapi tidak memulai aktivitas bernilai tambah atau mengambil kepemimpinan dalam mendorong kolaborasi lebih jauh dari lingkup yang ditugaskan.",
+        assessorNotes: "",
+        isDraft: true,
+        hasEvidence: true,
+      },
+      "membangun-hubungan": {
+        keyActionId: "membangun-hubungan",
+        keyActionTitle: "Membangun Hubungan",
+        keyActionCode: "EC3",
+        competencyTitle: "Establishing Collaboration",
+        aiRecommendation: "need-improvement",
+        aiReasoning: "Tidak ditemukan bukti yang cukup untuk memberikan rekomendasi penilaian pada Key Action ini. Dalam interaksi yang diamati, partisipan tidak menunjukkan upaya khusus untuk membangun hubungan kerja yang positif, menunjukkan empati, atau memahami perspektif yang berbeda dari rekan kerja. Assessor perlu menilai berdasarkan observasi langsung atau bukti tambahan.",
+        assessorNotes: "",
+        isDraft: true,
+        hasEvidence: false,
+      },
     },
     stimulusResponseChains: [
       {
@@ -76,7 +144,7 @@ export const mockSimulations: SimulationData[] = [
         identifiedBARS: [
           {
             category: "strength",
-            behaviorId: "recognizes-business-opportunities",
+            behaviorId: "analisis-strong-3",
             description: "Mengevaluasi peluang bisnis dengan data komprehensif",
             evidence:
               "Quickly identified potential value in S24 event during chat conversation",
@@ -151,15 +219,7 @@ export const mockSimulations: SimulationData[] = [
               "Email reviewed thoroughly, noted key details: 5000+ F&B industry attendees, Gold Sponsor package Rp 150M, comprehensive benefits including speaking slot and exhibition booth. Ready to provide analysis to marketing team.",
           },
         ],
-        identifiedBARS: [
-          {
-            category: "meet-requirement",
-            behaviorId: "processes-formal-communications",
-            description: "Membaca dan memahami komunikasi formal dari stakeholder",
-            evidence:
-              "Successfully read and processed formal email communication from Production Manager regarding sponsorship opportunity",
-          },
-        ],
+        identifiedBARS: [],
       },
       {
         id: "sr-3",
@@ -203,8 +263,8 @@ export const mockSimulations: SimulationData[] = [
         identifiedBARS: [
           {
             category: "strength",
-            behaviorId: "conducts-comprehensive-swot-analysis",
-            description: "Menggunakan framework analisis strategis (SWOT, Porter, dll)",
+            behaviorId: "analisis-strong-1",
+            description: "Menggunakan informasi ekonomi, keuangan, dan pasar untuk analisis mendalam",
             evidence:
               "Provided detailed Strengths, Weaknesses, Opportunities, Threats analysis with specific metrics",
             highlightedSegments: [
@@ -296,8 +356,8 @@ export const mockSimulations: SimulationData[] = [
         identifiedBARS: [
           {
             category: "strength",
-            behaviorId: "facilitates-cross-functional-collaboration",
-            description: "Memfasilitasi kolaborasi lintas fungsi dengan efektif",
+            behaviorId: "kontribusi-strong-1",
+            description: "Mengambil inisiatif dan memberikan solusi inovatif untuk masalah tim",
             evidence:
               "Proactively coordinated with marketing team for implementation planning",
             highlightedSegments: [
@@ -370,8 +430,8 @@ export const mockSimulations: SimulationData[] = [
         identifiedBARS: [
           {
             category: "strength",
-            behaviorId: "demonstrates-strategic-thinking",
-            description: "Menunjukkan pemahaman strategis tentang brand positioning dan dampak bisnis",
+            behaviorId: "komunikasi-strong-1",
+            description: "Berkomunikasi dengan jelas dan persuasif kepada berbagai stakeholder",
             evidence:
               "Demonstrated understanding of brand positioning importance and its impact on long-term strategy",
             highlightedSegments: [
@@ -424,16 +484,60 @@ export const mockSimulations: SimulationData[] = [
     ],
   },
   {
-    id: "platform-underutilization",
-    name: "Platform Underutilization",
+    id: "simulasi-lainnya",
+    name: "Simulasi Lainnya",
     isCompleted: false,
-    availableBARS: {},
-    keyActionRating: {
-      aiRecommendation: "meet-requirement",
-      aiReasoning:
-        "Participant shows good initiative in seeking information and using available resources. Demonstrates learning mindset and practical application of frameworks. Could improve by showing more independent research before consultation.",
-      assessorNotes: "",
-      isDraft: true,
+    availableBARS: {
+      "memahami-fungsi-bisnis": true,
+      "menganalisis": true,
+      "komunikasi-terbuka": true,
+      "menunjukkan-kontribusi": true
+    },
+    keyActionRatings: {
+      "memahami-fungsi-bisnis": {
+        keyActionId: "memahami-fungsi-bisnis",
+        keyActionTitle: "Memahami Fungsi dan Proses Bisnis",
+        keyActionCode: "BA1",
+        competencyTitle: "Business Acumen",
+        aiRecommendation: "meet-requirement",
+        aiReasoning: "Partisipan menunjukkan pemahaman yang memadai terhadap proses bisnis melalui kemampuan mengikuti instruksi kerja, membaca dan memproses dokumen dengan tepat, serta menyelesaikan tugas sesuai dengan prosedur yang ditetapkan. Namun, belum menunjukkan pemahaman strategis yang mendalam tentang bagaimana fungsi bisnis saling terhubung.",
+        assessorNotes: "",
+        isDraft: true,
+        hasEvidence: true,
+      },
+      "menganalisis": {
+        keyActionId: "menganalisis",
+        keyActionTitle: "Menganalisis",
+        keyActionCode: "BA2",
+        competencyTitle: "Business Acumen",
+        aiRecommendation: "meet-requirement",
+        aiReasoning: "Partisipan mampu memproses informasi dari berbagai sumber dan mengintegrasikannya ke dalam dokumen kerja. Menunjukkan kemampuan analitis dasar dalam merespons instruksi dan menyesuaikan output sesuai kebutuhan. Perlu pengembangan lebih lanjut dalam analisis strategis dan evaluasi dampak bisnis.",
+        assessorNotes: "",
+        isDraft: true,
+        hasEvidence: true,
+      },
+      "komunikasi-terbuka": {
+        keyActionId: "komunikasi-terbuka",
+        keyActionTitle: "Komunikasi Terbuka",
+        keyActionCode: "EC1",
+        competencyTitle: "Establishing Collaboration",
+        aiRecommendation: "strength",
+        aiReasoning: "Partisipan menunjukkan kemampuan komunikasi yang sangat baik melalui berbagai saluran - email, voice call, dan dokumen tertulis. Komunikasi jelas, responsif, dan sesuai dengan konteks profesional. Mampu menyesuaikan gaya komunikasi berdasarkan medium yang digunakan (formal di email, interaktif di voice call).",
+        assessorNotes: "",
+        isDraft: true,
+        hasEvidence: true,
+      },
+      "menunjukkan-kontribusi": {
+        keyActionId: "menunjukkan-kontribusi",
+        keyActionTitle: "Menunjukkan Kontribusi",
+        keyActionCode: "EC2",
+        competencyTitle: "Establishing Collaboration",
+        aiRecommendation: "strength",
+        aiReasoning: "Partisipan secara konsisten memberikan kontribusi melalui penyelesaian tugas tepat waktu, pembuatan dokumen berkualitas, dan partisipasi aktif dalam komunikasi multi-channel. Menunjukkan inisiatif dalam memastikan deliverable selesai sesuai ekspektasi dan siap berkolaborasi melalui berbagai platform komunikasi.",
+        assessorNotes: "",
+        isDraft: true,
+        hasEvidence: true,
+      },
     },
     stimulusResponseChains: [
       {
@@ -441,43 +545,239 @@ export const mockSimulations: SimulationData[] = [
         chronologicalOrder: 1,
         isExpanded: false,
         aiActor: {
-          name: "AI Assistant",
-          role: "AI Chatbot Assistant",
-          communicationType: "chat",
-          content:
-            "Halo! Saya AI Assistant yang siap membantu analisis dan konsultasi bisnis. Ada yang bisa saya bantu hari ini?",
+          name: "Maya Sari",
+          role: "Project Manager",
+          communicationType: "email",
+          content: "Subject: Tugas Analisis Pasar Q4 2024",
+          emailMessages: [
+            {
+              id: "email-task-1",
+              sender: "ai",
+              subject: "Tugas Analisis Pasar Q4 2024",
+              content: "Dear John,\n\nSaya memerlukan bantuan Anda untuk menyelesaikan analisis pasar Q4 2024. Berikut adalah tugas yang perlu dikerjakan:\n\n1. Silakan baca dokumen \"Market_Analysis_Template_Q4.docx\" yang saya lampirkan\n2. Buatlah dokumen analisis baru berdasarkan template tersebut dengan fokus pada tren industri teknologi\n3. Balas email ini dengan melampirkan dokumen analisis yang sudah Anda buat\n\nDeadline: Hari ini sebelum jam 17:00\n\nTerima kasih atas bantuannya!\n\nBest regards,\nMaya Sari\nProject Manager",
+              timestamp: "09:00",
+              type: "new",
+              attachments: ["Market_Analysis_Template_Q4.docx"]
+            }
+          ]
         },
         participantActions: [
           {
-            type: "chat",
-            description:
-              "Consulted AI assistant about market analysis methodologies",
-            duration: 15,
-            content:
-              "Halo, saya lagi butuh info nih tentang cara analisis tren pasar di industri teknologi. Ada saran?\n\nOke, itu jelas. Tapi ada contoh alat atau kerangka kerja spesifik yang bisa saya pakai?\n\nNah, kalau semua data ini sudah terkumpul, gimana cara gabunginnya biar jadi insight yang benar-benar bisa dipakai?\n\nWah, makasih banyak ya! Ini sangat membantu buat proyek analisis pasar saya.",
+            type: "email",
+            description: "Received and read project assignment email with instructions and template attachment",
+            duration: 3,
+            content: "Membaca email tugas dari Maya Sari, memahami instruksi untuk membaca template, membuat dokumen analisis baru, dan membalas email dengan attachment. Mencatat deadline jam 17:00.",
           },
         ],
         identifiedBARS: [
           {
             category: "meet-requirement",
-            behaviorId: "seeks-expert-guidance",
-            description: "Menggunakan AI tools untuk analisis mendalam",
-            evidence:
-              "Proactively consulted AI assistant for market analysis methodology",
+            behaviorId: "understands-task-requirements",
+            description: "Memahami instruksi dan persyaratan tugas dengan jelas",
+            evidence: "Successfully processed multi-step task instructions including reading, creating, and responding requirements",
+            highlightedSegments: []
+          },
+        ],
+      },
+      {
+        id: "sr-7",
+        chronologicalOrder: 2,
+        isExpanded: false,
+        aiActor: {
+          name: "Document System",
+          role: "System",
+          communicationType: "document",
+          content: "Market Analysis Template Q4 - Document Reading and Creation Task"
+        },
+        participantActions: [
+          {
+            type: "document",
+            description: "Read the Market_Analysis_Template_Q4.docx to understand the required structure and format",
+            duration: 8,
+            content: "Membaca template analisis pasar Q4, mempelajari struktur yang dibutuhkan: Executive Summary, Market Overview, Technology Trends, Competitive Analysis, Recommendations. Memahami format dan kriteria yang harus dipenuhi.",
           },
           {
-            category: "meet-requirement",
-            behaviorId: "asks-specific-questions",
-            description: "Mengajukan pertanyaan spesifik untuk mendapat insight",
-            evidence:
-              "Asked targeted questions about tools, frameworks, and data integration",
+            type: "document-creation",
+            description: "Created comprehensive market analysis document based on template requirements",
+            duration: 25,
+            content: "Membuat dokumen \"Market_Analysis_Q4_2024_Tech_Industry.docx\" dengan isi: Executive Summary tentang pertumbuhan industri teknologi, Market Overview dengan data pasar Q4, Technology Trends focusing pada AI dan automation, Competitive Analysis dari pemain utama, dan Recommendations untuk strategi Q1 2025.",
+          },
+        ],
+        identifiedBARS: [
+          {
+            category: "strength",
+            behaviorId: "processes-information-effectively",
+            description: "Memproses informasi dari berbagai sumber dengan efektif",
+            evidence: "Effectively processed template requirements and created comprehensive analysis document following specified structure",
+            highlightedSegments: []
           },
           {
             category: "strength",
-            behaviorId: "applies-learning-to-project",
-            description: "Menerapkan learning dari berbagai sumber untuk project context",
-            evidence:
-              "Connected advice to specific market analysis project needs",
+            behaviorId: "demonstrates-attention-to-detail",
+            description: "Menunjukkan perhatian terhadap detail dan kualitas output",
+            evidence: "Created detailed document following template structure with comprehensive sections and professional formatting",
+            highlightedSegments: []
+          },
+        ],
+      },
+      {
+        id: "sr-8",
+        chronologicalOrder: 3,
+        isExpanded: false,
+        aiActor: {
+          name: "Maya Sari",
+          role: "Project Manager",
+          communicationType: "email",
+          content: "Subject: Re: Tugas Analisis Pasar Q4 2024",
+          emailMessages: [
+            {
+              id: "email-reply-1",
+              sender: "participant",
+              subject: "Re: Tugas Analisis Pasar Q4 2024",
+              content: "Dear Maya,\n\nTerima kasih atas tugasnya. Saya sudah menyelesaikan analisis pasar Q4 2024 dengan fokus pada industri teknologi sesuai dengan template yang diberikan.\n\nDokumen yang saya lampirkan mencakup:\n- Executive Summary dengan highlight key findings\n- Market Overview dengan data terkini Q4 2024\n- Technology Trends analysis focusing pada AI, automation, dan emerging technologies\n- Competitive Analysis dari major players\n- Strategic Recommendations untuk Q1 2025\n\nSaya harap analisis ini sesuai dengan ekspektasi. Jika ada bagian yang perlu diperbaiki atau diperjelas, silakan beritahu saya.\n\nBest regards,\nJohn",
+              timestamp: "14:30",
+              type: "reply",
+              replyTo: "email-task-1",
+              attachments: ["Market_Analysis_Q4_2024_Tech_Industry.docx"]
+            }
+          ]
+        },
+        participantActions: [
+          {
+            type: "email",
+            description: "Replied to Maya's email with completed analysis document attached",
+            duration: 7,
+            content: "Mengirim balasan email ke Maya Sari dengan melampirkan dokumen analisis pasar yang sudah selesai dibuat. Email berisi ringkasan isi dokumen dan menawarkan perbaikan jika diperlukan.",
+          },
+        ],
+        identifiedBARS: [
+          {
+            category: "strength",
+            behaviorId: "provides-clear-communication",
+            description: "Memberikan komunikasi yang jelas dan profesional",
+            evidence: "Sent clear and professional email response with comprehensive summary of deliverable content",
+            highlightedSegments: [
+              {
+                messageId: "email-reply-1",
+                startIndex: 85,
+                endIndex: 200,
+                text: "Dokumen yang saya lampirkan mencakup:\n- Executive Summary dengan highlight key findings\n- Market Overview dengan data terkini Q4 2024"
+              }
+            ]
+          },
+          {
+            category: "strength",
+            behaviorId: "shows-proactive-collaboration",
+            description: "Menunjukkan kolaborasi proaktif dan responsif",
+            evidence: "Proactively offered to make improvements if needed and provided detailed breakdown of deliverable",
+            highlightedSegments: [
+              {
+                messageId: "email-reply-1",
+                startIndex: 450,
+                endIndex: 550,
+                text: "Jika ada bagian yang perlu diperbaiki atau diperjelas, silakan beritahu saya"
+              }
+            ]
+          },
+        ],
+      },
+      {
+        id: "sr-9",
+        chronologicalOrder: 4,
+        isExpanded: false,
+        aiActor: {
+          name: "Alex Rahman",
+          role: "Senior Analyst",
+          communicationType: "chat",
+          content: "Voice call request for market analysis discussion",
+          chatMessages: [
+            {
+              id: "msg-call-1",
+              sender: "ai",
+              content: "Halo John! Saya Alex dari tim Senior Analyst. Saya sudah lihat hasil analisis pasar Q4 yang Anda buat - impressive work! 👏",
+              timestamp: "15:45",
+              type: "text"
+            },
+            {
+              id: "msg-call-2",
+              sender: "ai",
+              content: "Ada beberapa insights yang ingin saya diskusikan lebih detail dengan Anda, terutama terkait competitive analysis dan recommendations. Bisa kita voice call sekarang selama 15-20 menit?",
+              timestamp: "15:46",
+              type: "text"
+            },
+            {
+              id: "msg-call-3",
+              sender: "participant",
+              content: "Halo Alex! Terima kasih atas feedback positifnya. Saya siap untuk voice call sekarang untuk membahas lebih detail. Mari kita mulai!",
+              timestamp: "15:47",
+              type: "text"
+            }
+          ]
+        },
+        participantActions: [
+          {
+            type: "chat",
+            description: "Responded positively to voice call request from Senior Analyst",
+            duration: 2,
+            content: "Merespons permintaan voice call dari Alex Rahman untuk membahas hasil analisis pasar. Menunjukkan kesiapan dan kesediaan untuk berdiskusi.",
+          },
+        ],
+        identifiedBARS: [
+          {
+            category: "strength",
+            behaviorId: "shows-openness-to-feedback",
+            description: "Menunjukkan keterbukaan terhadap feedback dan diskusi",
+            evidence: "Positively responded to senior analyst's feedback and request for detailed discussion",
+            highlightedSegments: [
+              {
+                messageId: "msg-call-3",
+                startIndex: 30,
+                endIndex: 120,
+                text: "Terima kasih atas feedback positifnya. Saya siap untuk voice call sekarang untuk membahas lebih detail"
+              }
+            ]
+          },
+        ],
+      },
+      {
+        id: "sr-10",
+        chronologicalOrder: 5,
+        isExpanded: false,
+        aiActor: {
+          name: "Alex Rahman",
+          role: "Senior Analyst",
+          communicationType: "call",
+          content: "Voice call discussion about market analysis findings and strategic recommendations"
+        },
+        participantActions: [
+          {
+            type: "call",
+            description: "Conducted 18-minute voice call discussion about market analysis with Senior Analyst",
+            duration: 18,
+            content: "Melakukan voice call dengan Alex Rahman membahas detail analisis pasar Q4. Diskusi mencakup: validasi competitive analysis findings, elaborasi technology trends impact, refinement pada strategic recommendations, dan alignment dengan company strategic direction. Memberikan clarifications dan menerima insights tambahan dari senior analyst perspective.",
+          },
+        ],
+        identifiedBARS: [
+          {
+            category: "strength",
+            behaviorId: "engages-in-meaningful-dialogue",
+            description: "Terlibat dalam dialog yang bermakna dan konstruktif",
+            evidence: "Successfully conducted detailed voice discussion covering multiple aspects of market analysis with senior stakeholder",
+            highlightedSegments: []
+          },
+          {
+            category: "strength",
+            behaviorId: "demonstrates-subject-matter-expertise",
+            description: "Menunjukkan keahlian dan pemahaman mendalam terhadap materi",
+            evidence: "Able to provide clarifications and engage in strategic discussion about market analysis findings and recommendations",
+            highlightedSegments: []
+          },
+          {
+            category: "strength",
+            behaviorId: "collaborates-across-different-communication-channels",
+            description: "Berkolaborasi efektif melalui berbagai saluran komunikasi",
+            evidence: "Successfully collaborated through email, chat, and voice call maintaining consistent professional communication",
+            highlightedSegments: []
           },
         ],
       },

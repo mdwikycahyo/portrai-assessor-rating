@@ -1,129 +1,172 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { ChevronDown, ChevronRight, User, Mail, Phone, MessageSquare, FileText, Sparkles } from "lucide-react"
-import { StimulusResponse, ChatMessage, EmailMessage, HighlightedSegment } from "../data/stimulus-response-types"
-import { getConfidenceLabel } from "../data/stimulus-response-evidence"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip"
-import { AttachmentModal } from "./AttachmentModal"
-import { getAttachmentContent, type AttachmentContent } from "../data/attachment-content"
+import { useState } from "react";
+import {
+  ChevronDown,
+  ChevronRight,
+  User,
+  Mail,
+  Phone,
+  MessageSquare,
+  FileText,
+  Sparkles,
+} from "lucide-react";
+import {
+  StimulusResponse,
+  ChatMessage,
+  EmailMessage,
+  HighlightedSegment,
+} from "../data/stimulus-response-types";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
+import { AttachmentModal } from "./AttachmentModal";
+import {
+  getAttachmentContent,
+  type AttachmentContent,
+} from "../data/attachment-content";
+import { getBehaviorContext } from "../data/competency-mappings";
 
 interface StimulusResponseChainProps {
-  stimulusResponse: StimulusResponse
-  onToggleExpand: (id: string) => void
+  stimulusResponse: StimulusResponse;
+  onToggleExpand: (id: string) => void;
 }
 
 export function StimulusResponseChain({
   stimulusResponse,
-  onToggleExpand
+  onToggleExpand,
 }: StimulusResponseChainProps) {
-  const { aiActor, identifiedBARS, isExpanded } = stimulusResponse
+  const { aiActor, identifiedBARS, isExpanded } = stimulusResponse;
 
   // Modal state for attachment viewing
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [activeAttachment, setActiveAttachment] = useState<AttachmentContent | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeAttachment, setActiveAttachment] =
+    useState<AttachmentContent | null>(null);
 
   // Handle attachment click
   const handleAttachmentClick = (filename: string) => {
-    const content = getAttachmentContent(filename)
+    const content = getAttachmentContent(filename);
     if (content) {
-      setActiveAttachment(content)
-      setIsModalOpen(true)
+      setActiveAttachment(content);
+      setIsModalOpen(true);
     }
-  }
+  };
 
   // Close modal
   const closeModal = () => {
-    setIsModalOpen(false)
-    setActiveAttachment(null)
-  }
+    setIsModalOpen(false);
+    setActiveAttachment(null);
+  };
 
   // Get all highlighted segments for a specific message
   const getHighlightsForMessage = (messageId: string): HighlightedSegment[] => {
-    const highlights: HighlightedSegment[] = []
-    identifiedBARS.forEach(bars => {
+    const highlights: HighlightedSegment[] = [];
+    identifiedBARS.forEach((bars) => {
       if (bars.highlightedSegments) {
-        bars.highlightedSegments.forEach(segment => {
+        bars.highlightedSegments.forEach((segment) => {
           if (segment.messageId === messageId) {
-            highlights.push({ ...segment, category: bars.category })
+            highlights.push({ ...segment, category: bars.category });
           }
-        })
+        });
       }
-    })
-    return highlights
-  }
+    });
+    return highlights;
+  };
 
   // Smart word boundary expansion
-  const expandToWordBoundaries = (text: string, startIndex: number, endIndex: number) => {
+  const expandToWordBoundaries = (
+    text: string,
+    startIndex: number,
+    endIndex: number
+  ) => {
     // Find word boundary before start
-    let adjustedStart = startIndex
+    let adjustedStart = startIndex;
     while (adjustedStart > 0 && /\w/.test(text[adjustedStart - 1])) {
-      adjustedStart--
+      adjustedStart--;
     }
 
     // Find word boundary after end
-    let adjustedEnd = endIndex
+    let adjustedEnd = endIndex;
     while (adjustedEnd < text.length && /\w/.test(text[adjustedEnd])) {
-      adjustedEnd++
+      adjustedEnd++;
     }
 
-    return { adjustedStart, adjustedEnd }
-  }
+    return { adjustedStart, adjustedEnd };
+  };
 
   // Find text segments by content matching (more robust than fixed indices)
   const findTextSegments = (text: string, targetText: string) => {
-    const segments = []
-    let searchIndex = 0
+    const segments = [];
+    let searchIndex = 0;
 
     while (true) {
-      const foundIndex = text.toLowerCase().indexOf(targetText.toLowerCase(), searchIndex)
-      if (foundIndex === -1) break
+      const foundIndex = text
+        .toLowerCase()
+        .indexOf(targetText.toLowerCase(), searchIndex);
+      if (foundIndex === -1) break;
 
-      const { adjustedStart, adjustedEnd } = expandToWordBoundaries(text, foundIndex, foundIndex + targetText.length)
+      const { adjustedStart, adjustedEnd } = expandToWordBoundaries(
+        text,
+        foundIndex,
+        foundIndex + targetText.length
+      );
 
       segments.push({
         startIndex: adjustedStart,
         endIndex: adjustedEnd,
-        text: text.substring(adjustedStart, adjustedEnd)
-      })
+        text: text.substring(adjustedStart, adjustedEnd),
+      });
 
-      searchIndex = foundIndex + targetText.length
+      searchIndex = foundIndex + targetText.length;
     }
 
-    return segments
-  }
+    return segments;
+  };
 
   // Render text with enhanced highlighted segments
   const renderHighlightedText = (text: string, messageId: string) => {
-    const highlights = getHighlightsForMessage(messageId)
+    const highlights = getHighlightsForMessage(messageId);
 
     if (highlights.length === 0) {
-      return <span>{text}</span>
+      return <span>{text}</span>;
     }
 
     // Convert highlights to smart segments using content matching
-    const smartHighlights = highlights.map(highlight => {
-      const segments = findTextSegments(text, highlight.text)
-      return segments.map(segment => ({
-        ...segment,
-        category: highlight.category,
-        behaviorId: identifiedBARS.find(b =>
-          b.highlightedSegments?.some(s => s.messageId === messageId && s.text === highlight.text)
-        )?.behaviorId || '',
-        description: identifiedBARS.find(b =>
-          b.highlightedSegments?.some(s => s.messageId === messageId && s.text === highlight.text)
-        )?.description || ''
-      }))
-    }).flat()
+    const smartHighlights = highlights
+      .map((highlight) => {
+        const segments = findTextSegments(text, highlight.text);
+        return segments.map((segment) => ({
+          ...segment,
+          category: highlight.category,
+          behaviorId:
+            identifiedBARS.find((b) =>
+              b.highlightedSegments?.some(
+                (s) => s.messageId === messageId && s.text === highlight.text
+              )
+            )?.behaviorId || "",
+          description:
+            identifiedBARS.find((b) =>
+              b.highlightedSegments?.some(
+                (s) => s.messageId === messageId && s.text === highlight.text
+              )
+            )?.description || "",
+        }));
+      })
+      .flat();
 
     if (smartHighlights.length === 0) {
-      return <span>{text}</span>
+      return <span>{text}</span>;
     }
 
     // Sort highlights by start index
-    const sortedHighlights = smartHighlights.sort((a, b) => a.startIndex - b.startIndex)
-    const parts = []
-    let lastIndex = 0
+    const sortedHighlights = smartHighlights.sort(
+      (a, b) => a.startIndex - b.startIndex
+    );
+    const parts = [];
+    let lastIndex = 0;
 
     sortedHighlights.forEach((highlight, index) => {
       // Add text before highlight
@@ -132,22 +175,21 @@ export function StimulusResponseChain({
           <span key={`text-${index}`}>
             {text.substring(lastIndex, highlight.startIndex)}
           </span>
-        )
+        );
       }
 
       // Simple highlighting with enhanced tooltip
-      const highlightClass = highlight.category === 'strength'
-        ? 'bg-green-100 text-green-800 px-1 rounded cursor-pointer'
-        : highlight.category === 'meet-requirement'
-        ? 'bg-yellow-100 text-yellow-800 px-1 rounded cursor-pointer'
-        : 'bg-red-100 text-red-800 px-1 rounded cursor-pointer'
+      const highlightClass =
+        highlight.category === "strength"
+          ? "bg-green-100 text-green-800 px-1 rounded cursor-pointer"
+          : highlight.category === "meet-requirement"
+          ? "bg-yellow-100 text-yellow-800 px-1 rounded cursor-pointer"
+          : "bg-red-100 text-red-800 px-1 rounded cursor-pointer";
 
       parts.push(
         <Tooltip key={`highlight-${index}`}>
           <TooltipTrigger asChild>
-            <span className={highlightClass}>
-              {highlight.text}
-            </span>
+            <span className={highlightClass}>{highlight.text}</span>
           </TooltipTrigger>
           <TooltipContent side="top" className="max-w-xs">
             <div className="text-xs">
@@ -156,85 +198,113 @@ export function StimulusResponseChain({
             </div>
           </TooltipContent>
         </Tooltip>
-      )
+      );
 
-      lastIndex = highlight.endIndex
-    })
+      lastIndex = highlight.endIndex;
+    });
 
     // Add remaining text
     if (lastIndex < text.length) {
-      parts.push(
-        <span key="text-end">
-          {text.substring(lastIndex)}
-        </span>
-      )
+      parts.push(<span key="text-end">{text.substring(lastIndex)}</span>);
     }
 
-    return <>{parts}</>
-  }
-
+    return <>{parts}</>;
+  };
 
   // Get BARS category color
-  const getBARSColor = (category: 'strength' | 'meet-requirement' | 'need-improvement') => {
+  const getBARSColor = (
+    category: "strength" | "meet-requirement" | "need-improvement"
+  ) => {
     switch (category) {
-      case 'strength':
-        return 'text-green-700 bg-green-50 border-green-200'
-      case 'meet-requirement':
-        return 'text-yellow-700 bg-yellow-50 border-yellow-200'
-      case 'need-improvement':
-        return 'text-red-700 bg-red-50 border-red-200'
+      case "strength":
+        return "text-green-700 bg-green-50 border-green-200";
+      case "meet-requirement":
+        return "text-yellow-700 bg-yellow-50 border-yellow-200";
+      case "need-improvement":
+        return "text-red-700 bg-red-50 border-red-200";
     }
-  }
+  };
 
   // Get BARS category icon
-  const getBARSIcon = (category: 'strength' | 'meet-requirement' | 'need-improvement') => {
+  const getBARSIcon = (
+    category: "strength" | "meet-requirement" | "need-improvement"
+  ) => {
     switch (category) {
-      case 'strength':
-        return '🟢'
-      case 'meet-requirement':
-        return '🟡'
-      case 'need-improvement':
-        return '🔴'
+      case "strength":
+        return "🟢";
+      case "meet-requirement":
+        return "🟡";
+      case "need-improvement":
+        return "🔴";
     }
-  }
-
+  };
 
   // Detect communication medium from aiActor.communicationType or content
   const getCommunicationMedium = () => {
     // Use explicit communicationType if available
     if (aiActor.communicationType) {
       switch (aiActor.communicationType) {
-        case 'email':
-          return { type: 'email', icon: <Mail className="w-4 h-4" />, label: 'Email' }
-        case 'chat':
-          return { type: 'chat', icon: <MessageSquare className="w-4 h-4" />, label: 'Chat' }
-        case 'call':
-          return { type: 'call', icon: <Phone className="w-4 h-4" />, label: 'Voice Call' }
-        case 'document':
-          return { type: 'document', icon: <FileText className="w-4 h-4" />, label: 'Document' }
-        case 'system':
-          return { type: 'system', icon: <MessageSquare className="w-4 h-4" />, label: 'System' }
+        case "email":
+          return {
+            type: "email",
+            icon: <Mail className="w-4 h-4" />,
+            label: "Email",
+          };
+        case "chat":
+          return {
+            type: "chat",
+            icon: <MessageSquare className="w-4 h-4" />,
+            label: "Chat",
+          };
+        case "call":
+          return {
+            type: "call",
+            icon: <Phone className="w-4 h-4" />,
+            label: "Voice Call",
+          };
+        case "document":
+          return {
+            type: "document",
+            icon: <FileText className="w-4 h-4" />,
+            label: "Document",
+          };
+        case "system":
+          return {
+            type: "system",
+            icon: <MessageSquare className="w-4 h-4" />,
+            label: "System",
+          };
       }
     }
 
     // Fallback: Check if content has email subject line
-    if (aiActor.content.includes('Subject:')) {
-      return { type: 'email', icon: <Mail className="w-4 h-4" />, label: 'Email' }
+    if (aiActor.content.includes("Subject:")) {
+      return {
+        type: "email",
+        icon: <Mail className="w-4 h-4" />,
+        label: "Email",
+      };
     }
 
     // Default to chat for casual communication
-    return { type: 'chat', icon: <MessageSquare className="w-4 h-4" />, label: 'Chat' }
-  }
+    return {
+      type: "chat",
+      icon: <MessageSquare className="w-4 h-4" />,
+      label: "Chat",
+    };
+  };
 
   // Render individual chat message bubble
   const renderChatBubble = (message: ChatMessage) => {
-    const isParticipant = message.sender === 'participant'
-    const isDocumentLink = message.type === 'document-link'
+    const isParticipant = message.sender === "participant";
+    const isDocumentLink = message.type === "document-link";
 
     return (
       <div
         key={message.id}
-        className={`flex ${isParticipant ? 'justify-end' : 'justify-start'} mb-3`}
+        className={`flex ${
+          isParticipant ? "justify-end" : "justify-start"
+        } mb-3`}
       >
         {/* AI Actor Avatar */}
         {!isParticipant && (
@@ -246,14 +316,18 @@ export function StimulusResponseChain({
         <div
           className={`max-w-[70%] px-4 py-3 rounded-lg shadow-sm ${
             isParticipant
-              ? 'bg-blue-500 text-white rounded-br-sm'
-              : 'bg-white text-gray-800 rounded-bl-sm border border-gray-200'
-          } ${isDocumentLink ? 'border-blue-300 bg-blue-50' : ''}`}
+              ? "bg-blue-500 text-white rounded-br-sm"
+              : "bg-white text-gray-800 rounded-bl-sm border border-gray-200"
+          } ${isDocumentLink ? "border-blue-300 bg-blue-50" : ""}`}
         >
           <div className="text-sm leading-relaxed whitespace-pre-line">
             {renderHighlightedText(message.content, message.id)}
           </div>
-          <div className={`text-xs mt-2 ${isParticipant ? 'text-blue-100' : 'text-gray-500'}`}>
+          <div
+            className={`text-xs mt-2 ${
+              isParticipant ? "text-blue-100" : "text-gray-500"
+            }`}
+          >
             {message.timestamp}
           </div>
         </div>
@@ -265,26 +339,23 @@ export function StimulusResponseChain({
           </div>
         )}
       </div>
-    )
-  }
+    );
+  };
 
   // Render individual email in thread
   const renderEmailMessage = (email: EmailMessage) => {
-    const isParticipant = email.sender === 'participant'
-    const isReply = email.type === 'reply'
+    const isParticipant = email.sender === "participant";
+    const isReply = email.type === "reply";
 
     return (
-      <div
-        key={email.id}
-        className={`mb-4 ${isReply ? 'ml-6' : ''}`}
-      >
+      <div key={email.id} className={`mb-4 ${isReply ? "ml-6" : ""}`}>
         {/* Email Header */}
         <div className="bg-gray-50 p-3 rounded-t-lg border border-gray-200">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <Mail className="w-4 h-4 text-gray-600" />
               <span className="text-sm font-medium text-gray-900">
-                {isParticipant ? 'John (You)' : aiActor.name}
+                {isParticipant ? "John (You)" : aiActor.name}
               </span>
               <span className="text-xs text-gray-500">({aiActor.role})</span>
             </div>
@@ -303,8 +374,8 @@ export function StimulusResponseChain({
                     <button
                       key={index}
                       onClick={(e) => {
-                        e.stopPropagation()
-                        handleAttachmentClick(filename)
+                        e.stopPropagation();
+                        handleAttachmentClick(filename);
                       }}
                       className="text-blue-600 hover:text-blue-800 hover:underline transition-colors cursor-pointer"
                       title={`Klik untuk melihat ${filename}`}
@@ -325,10 +396,316 @@ export function StimulusResponseChain({
           </div>
         </div>
       </div>
-    )
-  }
+    );
+  };
 
-  const communicationMedium = getCommunicationMedium()
+  // Render document preview for Document System interactions
+  const renderDocumentPreview = () => {
+    // Find document creation action to get created document info
+    const documentCreationAction = stimulusResponse.participantActions?.find(
+      (action) => action.type === "document-creation"
+    );
+
+    if (!documentCreationAction) return null;
+
+    // Extract document name and content
+    const documentName =
+      documentCreationAction.content?.match(/"([^"]+\.docx?)"/)?.[1] ||
+      "Created Document";
+    const documentContent = documentCreationAction.content || "";
+
+    return (
+      <div className="mt-4">
+        <div className="bg-white border border-gray-300 rounded-lg shadow-sm">
+          {/* Document Header */}
+          <div className="bg-gray-50 px-4 py-3 border-b border-gray-200 rounded-t-lg">
+            <div className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-blue-600" />
+              <span className="font-semibold text-gray-900">
+                {documentName}
+              </span>
+            </div>
+          </div>
+
+          {/* Document Body */}
+          <div className="p-6 space-y-4">
+            <div className="prose prose-sm max-w-none">
+              {/* Enhanced document sections with BARS-aligned highlighting */}
+              {documentContent.includes("Executive Summary") && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                    Executive Summary
+                  </h3>
+                  <p className="text-gray-700 text-sm leading-relaxed">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="bg-green-100 text-green-800 px-1 rounded">
+                            Analisis komprehensif industri teknologi Q4 2024
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs">
+                          <div className="text-xs">
+                            <div className="font-medium mb-1">
+                              BARS Evidence:
+                            </div>
+                            <div>
+                              Menunjukkan perhatian terhadap detail dan kualitas
+                              output
+                            </div>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>{" "}
+                    menunjukkan pertumbuhan signifikan dengan fokus pada AI dan
+                    automation sebagai{" "}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="bg-green-100 text-green-800 px-1 rounded">
+                            driver utama transformasi digital
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs">
+                          <div className="text-xs">
+                            <div className="font-medium mb-1">
+                              BARS Evidence:
+                            </div>
+                            <div>
+                              Memproses informasi dari berbagai sumber dengan
+                              efektif
+                            </div>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    . Rekomendasi strategis disusun berdasarkan analisis data
+                    pasar terkini dan proyeksi tren teknologi ke depan.
+                  </p>
+                </div>
+              )}
+
+              {documentContent.includes("Market Overview") && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                    Market Overview
+                  </h3>
+                  <p className="text-gray-700 text-sm leading-relaxed">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="bg-green-100 text-green-800 px-1 rounded">
+                            Data pasar Q4 menunjukkan adopsi teknologi AI
+                            meningkat 40%
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs">
+                          <div className="text-xs">
+                            <div className="font-medium mb-1">
+                              BARS Evidence:
+                            </div>
+                            <div>
+                              Memproses informasi dari berbagai sumber dengan
+                              efektif
+                            </div>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>{" "}
+                    dibanding periode sebelumnya, dengan sektor enterprise
+                    memimpin implementasi.{" "}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="bg-green-100 text-green-800 px-1 rounded">
+                            Analisis mendalam terhadap segmentasi pasar
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs">
+                          <div className="text-xs">
+                            <div className="font-medium mb-1">
+                              BARS Evidence:
+                            </div>
+                            <div>
+                              Menunjukkan perhatian terhadap detail dan kualitas
+                              output
+                            </div>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>{" "}
+                    mengidentifikasi peluang growth di berbagai vertical
+                    industry.
+                  </p>
+                </div>
+              )}
+
+              {documentContent.includes("Technology Trends") && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                    Technology Trends
+                  </h3>
+                  <p className="text-gray-700 text-sm leading-relaxed">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="bg-green-100 text-green-800 px-1 rounded">
+                            Fokus pada AI dan automation sebagai tren utama
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs">
+                          <div className="text-xs">
+                            <div className="font-medium mb-1">
+                              BARS Evidence:
+                            </div>
+                            <div>
+                              Memproses informasi dari berbagai sumber dengan
+                              efektif
+                            </div>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    , dengan emerging technologies seperti machine learning dan
+                    process automation mendominasi investasi perusahaan.{" "}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="bg-green-100 text-green-800 px-1 rounded">
+                            Evaluasi komprehensif dampak teknologi
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs">
+                          <div className="text-xs">
+                            <div className="font-medium mb-1">
+                              BARS Evidence:
+                            </div>
+                            <div>
+                              Menunjukkan perhatian terhadap detail dan kualitas
+                              output
+                            </div>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>{" "}
+                    terhadap produktivitas dan efisiensi operasional.
+                  </p>
+                </div>
+              )}
+
+              {documentContent.includes("Competitive Analysis") && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                    Competitive Analysis
+                  </h3>
+                  <p className="text-gray-700 text-sm leading-relaxed">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="bg-green-100 text-green-800 px-1 rounded">
+                            Analisis pemain utama di industri teknologi
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs">
+                          <div className="text-xs">
+                            <div className="font-medium mb-1">
+                              BARS Evidence:
+                            </div>
+                            <div>
+                              Memproses informasi dari berbagai sumber dengan
+                              efektif
+                            </div>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>{" "}
+                    menunjukkan konsolidasi market share di beberapa perusahaan
+                    besar dengan fokus inovasi AI.{" "}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="bg-green-100 text-green-800 px-1 rounded">
+                            Pemetaan detail positioning kompetitor
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs">
+                          <div className="text-xs">
+                            <div className="font-medium mb-1">
+                              BARS Evidence:
+                            </div>
+                            <div>
+                              Menunjukkan perhatian terhadap detail dan kualitas
+                              output
+                            </div>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>{" "}
+                    dan strategi differentiation yang digunakan.
+                  </p>
+                </div>
+              )}
+
+              {documentContent.includes("Recommendations") && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                    Strategic Recommendations
+                  </h3>
+                  <p className="text-gray-700 text-sm leading-relaxed">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="bg-green-100 text-green-800 px-1 rounded">
+                            Strategi Q1 2025 berdasarkan analisis komprehensif
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs">
+                          <div className="text-xs">
+                            <div className="font-medium mb-1">
+                              BARS Evidence:
+                            </div>
+                            <div>
+                              Memproses informasi dari berbagai sumber dengan
+                              efektif
+                            </div>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>{" "}
+                    meliputi investasi teknologi AI, partnership strategis, dan
+                    pengembangan capability internal.{" "}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="bg-green-100 text-green-800 px-1 rounded">
+                            Rencana implementasi detail dengan timeline
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs">
+                          <div className="text-xs">
+                            <div className="font-medium mb-1">
+                              BARS Evidence:
+                            </div>
+                            <div>
+                              Menunjukkan perhatian terhadap detail dan kualitas
+                              output
+                            </div>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>{" "}
+                    dan KPI measurement untuk mendukung transformasi digital.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const communicationMedium = getCommunicationMedium();
 
   return (
     <div className="border border-gray-200 rounded-lg mb-4 bg-white shadow-sm">
@@ -349,24 +726,36 @@ export function StimulusResponseChain({
               {/* Communication Medium */}
               <div className="flex items-center gap-1 text-blue-600">
                 {communicationMedium.icon}
-                <span className="text-sm font-medium">{communicationMedium.label}</span>
+                <span className="text-sm font-medium">
+                  {communicationMedium.type === "document"
+                    ? "Dokumen yang Dibuat Partisipan"
+                    : communicationMedium.label}
+                </span>
               </div>
-              <span className="text-gray-300">•</span>
-              <span className="font-semibold text-gray-900">{aiActor.name}</span>
-              <span className="text-sm text-gray-500">({aiActor.role})</span>
+              {communicationMedium.type !== "document" && (
+                <>
+                  <span className="text-gray-300">•</span>
+                  <span className="font-semibold text-gray-900">
+                    {aiActor.name}
+                  </span>
+                  <span className="text-sm text-gray-500">
+                    ({aiActor.role})
+                  </span>
+                </>
+              )}
             </div>
             <p className="text-sm text-gray-700 truncate">
-              {aiActor.chatMessages ? (
-                `💬 ${aiActor.chatMessages[0].content.length > 80
-                  ? `${aiActor.chatMessages[0].content.substring(0, 80)}...`
-                  : aiActor.chatMessages[0].content}`
-              ) : aiActor.emailMessages ? (
-                `📧 ${aiActor.emailMessages[0].subject}`
-              ) : (
-                aiActor.content.length > 100
-                  ? `${aiActor.content.substring(0, 100)}...`
-                  : aiActor.content
-              )}
+              {aiActor.chatMessages
+                ? `💬 ${
+                    aiActor.chatMessages[0].content.length > 80
+                      ? `${aiActor.chatMessages[0].content.substring(0, 80)}...`
+                      : aiActor.chatMessages[0].content
+                  }`
+                : aiActor.emailMessages
+                ? `📧 ${aiActor.emailMessages[0].subject}`
+                : aiActor.content.length > 100
+                ? `${aiActor.content.substring(0, 100)}...`
+                : aiActor.content}
             </p>
           </div>
 
@@ -397,7 +786,9 @@ export function StimulusResponseChain({
             <div className="flex items-center gap-2 mb-4">
               {communicationMedium.icon}
               <h4 className="font-medium text-gray-900">
-                {communicationMedium.label} with {aiActor.name} ({aiActor.role})
+                {communicationMedium.type === "document"
+                  ? "Dokumen yang Dibuat Partisipan"
+                  : `${communicationMedium.label} with ${aiActor.name} (${aiActor.role})`}
               </h4>
             </div>
 
@@ -439,21 +830,25 @@ export function StimulusResponseChain({
                   </div>
                 </div>
               </TooltipProvider>
-            ) : (
+            ) : communicationMedium.type !== "document" ? (
               /* Fallback to single stimulus display */
               <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
                 <div className="text-gray-800 leading-relaxed whitespace-pre-line">
                   {aiActor.content}
                 </div>
               </div>
+            ) : (
+              <span />
             )}
+
+            {/* Document Preview Section for Document System */}
+            {communicationMedium.type === "document" && renderDocumentPreview()}
           </div>
 
-
-          {/* BARS Evidence */}
+          {/* BARS Evidence - Original order with context labels */}
           {identifiedBARS.length > 0 && (
             <div>
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-2 mb-4">
                 <Sparkles className="w-4 h-4 text-blue-500" />
                 <h4 className="font-medium text-gray-900">
                   Perilaku dalam BARS yang Diidentifikasi AI:
@@ -461,33 +856,41 @@ export function StimulusResponseChain({
               </div>
 
               <div className="space-y-3">
-                {identifiedBARS.map((bars, index) => (
-                  <div
-                    key={index}
-                    className={`p-4 rounded-lg border ${getBARSColor(bars.category)}`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <span className="text-lg flex-shrink-0">{getBARSIcon(bars.category)}</span>
+                {identifiedBARS.map((bars, index) => {
+                  const context = getBehaviorContext(bars.behaviorId);
 
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="font-medium">{bars.description}</span>
-                          {bars.aiConfidence && (
-                            <span className="text-xs px-2 py-1 bg-white rounded-full border">
-                              AI: {getConfidenceLabel(bars.aiConfidence)}
-                            </span>
+                  return (
+                    <div
+                      key={`bars-${index}`}
+                      className={`p-4 rounded-lg border ${getBARSColor(
+                        bars.category
+                      )}`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <span className="text-lg flex-shrink-0">
+                          {getBARSIcon(bars.category)}
+                        </span>
+                        <div className="flex-1">
+                          {/* Context label with competency and key action */}
+                          {context && (
+                            <div className="mb-2 flex items-center gap-2">
+                              <span className="inline-flex items-center justify-center w-8 h-5 bg-blue-100 text-blue-800 text-xs font-medium rounded">
+                                {context.keyAction.code}
+                              </span>
+                              <span className="text-xs text-gray-600">
+                                {context.competency.title} -{" "}
+                                {context.keyAction.title}
+                              </span>
+                            </div>
                           )}
+                          <span className="font-medium text-gray-900">
+                            {bars.description}
+                          </span>
                         </div>
-
-                        {bars.aiConfidence && (
-                          <p className="text-xs text-gray-600">
-                            Confidence AI: {bars.aiConfidence}%
-                          </p>
-                        )}
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -501,5 +904,5 @@ export function StimulusResponseChain({
         attachment={activeAttachment}
       />
     </div>
-  )
+  );
 }

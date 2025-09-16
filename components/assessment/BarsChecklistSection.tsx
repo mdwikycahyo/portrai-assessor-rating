@@ -1,5 +1,6 @@
 import { FileText, Sparkles } from "lucide-react"
 import { type Interaction } from "../../data/mock-assessment"
+import { getKeyActionById, getCompetencyByKeyActionId } from "../../data/competency-mappings"
 
 interface BarsChecklistSectionProps {
   keyActionId: string
@@ -34,10 +35,36 @@ export function BarsChecklistSection({
 }: BarsChecklistSectionProps) {
   const behaviors = barsChecklist[keyActionId] || []
 
+  // Get competency and key action metadata
+  const competencyInfo = getCompetencyByKeyActionId(keyActionId)
+  const keyActionInfo = getKeyActionById(keyActionId)
+
   if (behaviors.length === 0) return null
 
   return (
     <div className="bg-slate-50 p-6 rounded-lg border border-slate-200 mb-6">
+      {/* Competency and Key Action Context */}
+      {competencyInfo && keyActionInfo && (
+        <div className="mb-6 p-4 bg-white border border-slate-300 rounded-lg">
+          <div className="mb-3">
+            <h4 className="text-lg font-semibold text-slate-900 mb-1">
+              {competencyInfo.title}
+            </h4>
+            <p className="text-sm text-slate-600">
+              {competencyInfo.definition}
+            </p>
+          </div>
+          <div className="border-l-4 border-blue-500 pl-4">
+            <h5 className="font-semibold text-slate-800 mb-1">
+              Key Action: {keyActionInfo.keyAction.title} ({keyActionInfo.keyAction.code})
+            </h5>
+            <p className="text-sm text-slate-600">
+              {keyActionInfo.keyAction.description}
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center gap-2 mb-4">
         <h5 className="font-semibold text-slate-800">
           BARS (Behaviorally Anchored Rating Scale) Checklist:

@@ -68,11 +68,16 @@ export interface StimulusResponse {
 }
 
 export interface KeyActionRating {
+  keyActionId: string
+  keyActionTitle: string
+  keyActionCode: string // e.g., "BA2", "EC1"
+  competencyTitle: string
   aiRecommendation: 'strength' | 'meet-requirement' | 'need-improvement'
   aiReasoning: string
   assessorOverride?: 'strength' | 'meet-requirement' | 'need-improvement'
   assessorNotes: string
   isDraft: boolean
+  hasEvidence?: boolean // Indicates whether sufficient evidence was found for AI analysis
 }
 
 export interface SimulationData {
@@ -80,7 +85,7 @@ export interface SimulationData {
   name: string
   stimulusResponseChains: StimulusResponse[]
   availableBARS: { [keyActionId: string]: any } // Reference to BARS checklist
-  keyActionRating: KeyActionRating
+  keyActionRatings: { [keyActionId: string]: KeyActionRating } // Changed to plural for multiple ratings
   isCompleted: boolean
 }
 
@@ -128,10 +133,63 @@ export interface EnhancedAIBehaviorEvidence {
 // Rating levels enum for type safety
 export type RatingLevel = 'strength' | 'meet-requirement' | 'need-improvement'
 
+// Competency and Key Action metadata
+export interface CompetencyMetadata {
+  id: string
+  title: string
+  definition: string
+  keyActions: KeyActionMetadata[]
+}
+
+export interface KeyActionMetadata {
+  id: string
+  code: string // e.g., "BA1", "BA2", "EC1", "EC2"
+  title: string // e.g., "Memahami Fungsi dan Proses Bisnis"
+  description: string
+  competencyId: string
+}
+
+// Enhanced simulation data with competency mappings
+export interface SimulationCompetencyMapping {
+  simulationId: string
+  competencies: CompetencyMetadata[]
+}
+
 // Utility type for BARS checklist mapping
 export interface BARSChecklistItem {
   id: string
   description: string
   level: RatingLevel
   keyActionId: string
+  competencyId?: string // Add competency reference
+}
+
+// Hierarchical BARS structure for reference panel
+export interface BARSBehaviorItem {
+  id: string
+  description: string
+  level: RatingLevel
+}
+
+export interface BARSKeyActionGroup {
+  keyActionId: string
+  keyActionTitle: string
+  keyActionCode: string // e.g., "BA1", "EC2"
+  keyActionDescription: string
+  behaviors: {
+    strength: BARSBehaviorItem[]
+    'meet-requirement': BARSBehaviorItem[]
+    'need-improvement': BARSBehaviorItem[]
+  }
+}
+
+export interface BARSCompetencyGroup {
+  competencyId: string
+  competencyTitle: string
+  competencyDefinition: string
+  keyActions: BARSKeyActionGroup[]
+}
+
+export interface HierarchicalBARSData {
+  competencies: BARSCompetencyGroup[]
 }
