@@ -340,39 +340,84 @@ export const mockSimulations: SimulationData[] = [
           name: "Chia Breppo",
           role: "Team Member Marketing",
           communicationType: "chat",
-          content:
-            "Hi John! Neo bilang kamu mau diskusi tentang implementation untuk sponsorship S24. Saya excited banget dengan project ini! \n\nDari sisi marketing execution, saya ada beberapa ide:\n- Interactive booth dengan product demo\n- Lead magnet berupa industry report\n- Social media campaign selama event\n\nKapan kita bisa meeting untuk discuss detail strategy-nya?",
+          content: "Halo! Dalam rangka pengkajian Branding Amboja...", // Legacy fallback
+          chatMessages: [
+            {
+              id: "msg-6",
+              sender: "ai",
+              content: "Halo! \n\nDalam rangka pengkajian Branding Amboja, kami dari tim Marketing ingin mendapatkan masukkan/input dari Anda. Terdapat beberapa hal yang akan saya tanyakan, apakah Anda berkenan?",
+              timestamp: "14:30",
+              type: "text"
+            },
+            {
+              id: "msg-7",
+              sender: "participant",
+              content: "Halo Chia! Tentu saja, saya sangat berkenan untuk memberikan input terkait pengkajian Branding Amboja.\n\nSebagai bagian dari tim yang terlibat dalam berbagai aspek bisnis, saya memahami betapa pentingnya brand positioning yang tepat untuk mendukung strategi jangka panjang perusahaan, terutama di era sustainability seperti sekarang.\n\nBeberapa area yang bisa saya kontribusikan:\n- Perspektif operasional dan implementasi program\n- Insight tentang customer touchpoint dan market response\n- Analisis competitive landscape dari sudut pandang business development\n- Evaluasi brand alignment dengan product innovation roadmap\n\nKapan waktu yang tepat untuk sesi diskusi ini?",
+              timestamp: "14:35",
+              type: "text"
+            }
+          ]
         },
         participantActions: [
           {
             type: "chat",
-            description: "Collaborative planning discussion with marketing team",
-            duration: 12,
+            description: "Professional engagement in branding consultation discussion",
+            duration: 5,
             content:
-              "Hi Chia! Senang bisa collaborate untuk project ini. Ide-ide kamu sangat menarik, especially untuk interactive booth dan lead magnet.\n\nBerdasarkan analisis sebelumnya, kita target 200+ qualified leads. Mari kita align strategy dengan objectives:\n\n1. Interactive booth - bisa kita design journey yang showcase product innovation\n2. Industry report - excellent idea untuk lead qualification\n3. Social media - perfect untuk amplify reach\n\nBagaimana kalau kita schedule meeting besok jam 2 siang untuk detail planning? Kita bisa breakdown timeline dan responsibility matrix.\n\nExcited untuk execute project ini dengan baik!",
+              "Responded positively to branding consultation request with strategic insights and willingness to contribute across multiple business areas. Demonstrated understanding of brand positioning importance and offered comprehensive perspective on operational, customer, and competitive aspects.",
           },
         ],
         identifiedBARS: [
           {
             category: "strength",
-            behaviorId: "collaborates-effectively-with-team",
-            description: "Berkomunikasi dengan jelas dan persuasif kepada stakeholder",
+            behaviorId: "demonstrates-strategic-thinking",
+            description: "Menunjukkan pemahaman strategis tentang brand positioning dan dampak bisnis",
             evidence:
-              "Engaged positively with marketing team member and built on their ideas",
+              "Demonstrated understanding of brand positioning importance and its impact on long-term strategy",
+            highlightedSegments: [
+              {
+                messageId: "msg-7",
+                startIndex: 115,
+                endIndex: 265,
+                text: "saya memahami betapa pentingnya brand positioning yang tepat untuk mendukung strategi jangka panjang perusahaan, terutama di era sustainability seperti sekarang"
+              }
+            ]
           },
           {
             category: "strength",
-            behaviorId: "aligns-tactical-execution-with-strategy",
-            description: "Menyelaraskan eksekusi taktis dengan strategi perusahaan",
+            behaviorId: "offers-comprehensive-perspective",
+            description: "Memberikan perspektif komprehensif lintas berbagai aspek bisnis",
             evidence:
-              "Connected team member's tactical ideas with previously defined KPIs (200+ leads target)",
+              "Offered comprehensive input across operational, customer, competitive, and innovation aspects",
+            highlightedSegments: [
+              {
+                messageId: "msg-7",
+                startIndex: 315,
+                endIndex: 580,
+                text: "Beberapa area yang bisa saya kontribusikan:\n- Perspektif operasional dan implementasi program\n- Insight tentang customer touchpoint dan market response\n- Analisis competitive landscape dari sudut pandang business development\n- Evaluasi brand alignment dengan product innovation roadmap"
+              }
+            ]
           },
           {
             category: "meet-requirement",
-            behaviorId: "coordinates-project-activities",
-            description: "Mengkoordinasikan aktivitas proyek dengan timeline yang jelas",
+            behaviorId: "shows-collaborative-willingness",
+            description: "Menunjukkan kesiapan berkolaborasi dan memberikan kontribusi",
             evidence:
-              "Proposed meeting schedule and structured planning approach",
+              "Expressed willingness to participate and contribute to branding consultation process",
+            highlightedSegments: [
+              {
+                messageId: "msg-7",
+                startIndex: 30,
+                endIndex: 110,
+                text: "saya sangat berkenan untuk memberikan input terkait pengkajian Branding Amboja"
+              },
+              {
+                messageId: "msg-7",
+                startIndex: 585,
+                endIndex: 635,
+                text: "Kapan waktu yang tepat untuk sesi diskusi ini?"
+              }
+            ]
           },
         ],
       },

@@ -1,9 +1,12 @@
 "use client"
 
+import { useState } from "react"
 import { ChevronDown, ChevronRight, User, Mail, Phone, MessageSquare, FileText, Sparkles } from "lucide-react"
 import { StimulusResponse, ChatMessage, EmailMessage, HighlightedSegment } from "../data/stimulus-response-types"
 import { getConfidenceLabel } from "../data/stimulus-response-evidence"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip"
+import { AttachmentModal } from "./AttachmentModal"
+import { getAttachmentContent, type AttachmentContent } from "../data/attachment-content"
 
 interface StimulusResponseChainProps {
   stimulusResponse: StimulusResponse
@@ -15,6 +18,25 @@ export function StimulusResponseChain({
   onToggleExpand
 }: StimulusResponseChainProps) {
   const { aiActor, identifiedBARS, isExpanded } = stimulusResponse
+
+  // Modal state for attachment viewing
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [activeAttachment, setActiveAttachment] = useState<AttachmentContent | null>(null)
+
+  // Handle attachment click
+  const handleAttachmentClick = (filename: string) => {
+    const content = getAttachmentContent(filename)
+    if (content) {
+      setActiveAttachment(content)
+      setIsModalOpen(true)
+    }
+  }
+
+  // Close modal
+  const closeModal = () => {
+    setIsModalOpen(false)
+    setActiveAttachment(null)
+  }
 
   // Get all highlighted segments for a specific message
   const getHighlightsForMessage = (messageId: string): HighlightedSegment[] => {
@@ -274,9 +296,23 @@ export function StimulusResponseChain({
               <span className="font-medium">Subject:</span> {email.subject}
             </div>
             {email.attachments && email.attachments.length > 0 && (
-              <div className="flex items-center gap-1 text-xs text-blue-600">
-                <FileText className="w-3 h-3" />
-                <span>{email.attachments.join(', ')}</span>
+              <div className="flex items-center gap-1 text-xs">
+                <FileText className="w-3 h-3 text-blue-600" />
+                <div className="flex flex-wrap gap-1">
+                  {email.attachments.map((filename, index) => (
+                    <button
+                      key={index}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleAttachmentClick(filename)
+                      }}
+                      className="text-blue-600 hover:text-blue-800 hover:underline transition-colors cursor-pointer"
+                      title={`Klik untuk melihat ${filename}`}
+                    >
+                      {filename}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -457,6 +493,13 @@ export function StimulusResponseChain({
           )}
         </div>
       )}
+
+      {/* Attachment Modal */}
+      <AttachmentModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        attachment={activeAttachment}
+      />
     </div>
   )
 }
