@@ -22,6 +22,14 @@ export interface EmailMessage {
   type?: 'new' | 'reply' | 'forward'
 }
 
+// Single message in a voice call transcript
+export interface CallMessage {
+  id: string
+  speaker: string // Name of the speaker (e.g., "Alex Rahman", "John Doe")
+  content: string
+  timestamp: string
+}
+
 // Enhanced AI Actor for both single stimulus and chat/email threads
 export interface AIActor {
   name: string
@@ -29,6 +37,7 @@ export interface AIActor {
   content: string // Legacy: single stimulus content
   chatMessages?: ChatMessage[] // New: multi-bubble chat thread
   emailMessages?: EmailMessage[] // New: email thread
+  callMessages?: CallMessage[] // New: voice call transcript
   communicationType: 'email' | 'chat' | 'call' | 'document' | 'system'
 }
 

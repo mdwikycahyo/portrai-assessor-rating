@@ -223,6 +223,34 @@ John Doe: Wah, makasih banyak ya! Ini sangat membantu buat proyek analisis pasar
 
 AI Assistant: Sama-sama! Senang bisa membantu. Kalau ada pertanyaan lagi, jangan sungkan ya.`,
             },
+            {
+              id: "interaction-9",
+              type: "call",
+              title: "Interaksi Voice Call: Diskusi Analisis Pasar dengan Alex Rahman",
+              timestamp: "7 Juli 2025, 15:50",
+              participants: ["John Doe", "Alex Rahman"],
+              activityType: "Market Analysis Review",
+              contextTitle: "Voice Call dengan Senior Analyst",
+              simulationName: "Market Analysis Q4",
+              fullContext: `Alex Rahman: Halo John! Terima kasih sudah bisa voice call. Saya sudah review analisis pasar Q4 yang Anda kirim tadi. Overall hasilnya impressive!
+John Doe: Halo Alex! Terima kasih atas feedback positifnya. Saya senang bisa diskusi lebih detail tentang findings-nya.
+Alex Rahman: Ada beberapa insights yang menarik, terutama terkait competitive analysis dan technology trends. Bisa kita bahas lebih detail bagian competitive landscape-nya?
+John Doe: Tentu! Dari analisis yang saya lakukan, ada 3 kompetitor utama yang perlu diperhatikan. Pertama, TechCorp yang baru saja launch produk AI-powered solution. Kedua, InnovateLab dengan strategi pricing yang agresif. Dan ketiga, StartupX yang fokus pada niche market tapi growing rapidly.
+Alex Rahman: Menarik. Bagaimana impact dari technology trends yang Anda identify terhadap posisi kita di market?
+John Doe: Berdasarkan research, ada 2 major trends yang akan significantly impact market landscape. AI integration akan jadi table stakes dalam 18-24 bulan ke depan. Dan sustainability initiatives akan jadi key differentiator untuk customer decision making.
+Alex Rahman: Strategic recommendations-nya bagaimana untuk address trends ini?
+John Doe: Saya recommend 3 strategic actions. Pertama, accelerate AI capability development melalui partnership atau acquisition. Kedua, strengthen sustainability positioning dengan clear roadmap dan measurable targets. Ketiga, enhance customer experience dengan personalization yang leverage AI insights.
+Alex Rahman: Timeline untuk implementation recommendations ini realistic nggak menurut Anda?
+John Doe: Untuk AI integration, saya estimate 12-15 bulan untuk MVP, 24 bulan untuk full implementation. Sustainability roadmap bisa kita launch dalam 6 bulan dengan quick wins, comprehensive program dalam 18 bulan. Customer experience enhancement bisa phased approach, 3-6 bulan untuk initial improvements.
+Alex Rahman: Budget estimation untuk initiatives ini sudah ada?
+John Doe: Rough estimation, AI development sekitar 15-20% dari annual R&D budget. Sustainability program 8-10% dari operational budget. Customer experience enhancement bisa leverage existing infrastructure, jadi estimated additional 5-7% dari marketing budget.
+Alex Rahman: Good analysis John. Satu hal lagi, alignment dengan company strategic direction bagaimana?
+John Doe: Semua recommendations ini aligned dengan our 3-year strategic plan, especially focus pada digital transformation dan market expansion. AI dan sustainability initiatives akan support core objectives untuk market leadership dan operational excellence.
+Alex Rahman: Perfect! Ini sangat comprehensive analysis. Saya akan forward findings ini ke leadership team untuk review lebih lanjut. Thanks untuk insightful discussion!
+John Doe: Sama-sama Alex! Senang bisa berbagi insights dan dapat feedback dari senior analyst perspective. Kalau ada follow-up questions, feel free to reach out.
+Alex Rahman: Will do! Good work on this, John. Have a great day!
+John Doe: Thank you Alex, you too!`,
+            },
           ],
           rating: undefined,
           ratingNote: "", // Initialize ratingNote

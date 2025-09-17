@@ -15,6 +15,7 @@ import {
   StimulusResponse,
   ChatMessage,
   EmailMessage,
+  CallMessage,
   HighlightedSegment,
 } from "../data/stimulus-response-types";
 import {
@@ -399,6 +400,40 @@ export function StimulusResponseChain({
     );
   };
 
+  // Render individual call message in voice call transcript
+  const renderCallMessage = (callMessage: CallMessage) => {
+    const isParticipant = callMessage.speaker === "John Doe";
+
+    return (
+      <div key={callMessage.id} className="mb-3">
+        <div
+          className={`p-3 rounded-lg border-l-4 transition-all duration-200 ${
+            isParticipant
+              ? "bg-blue-50 border-blue-500 ml-4"
+              : "bg-gray-50 border-gray-400 mr-4"
+          }`}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Phone className="w-3 h-3 text-gray-600" />
+              <span className={`text-sm font-medium ${
+                isParticipant ? "text-blue-700" : "text-gray-700"
+              }`}>
+                {callMessage.speaker}
+              </span>
+            </div>
+            <span className="text-xs text-gray-500">{callMessage.timestamp}</span>
+          </div>
+          <div className={`text-sm leading-relaxed ${
+            isParticipant ? "text-blue-900" : "text-gray-800"
+          }`}>
+            {renderHighlightedText(callMessage.content, callMessage.id)}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // Render document preview for Document System interactions
   const renderDocumentPreview = () => {
     // Find document creation action to get created document info
@@ -751,6 +786,12 @@ export function StimulusResponseChain({
                       ? `${aiActor.chatMessages[0].content.substring(0, 80)}...`
                       : aiActor.chatMessages[0].content
                   }`
+                : aiActor.callMessages
+                ? `📞 ${
+                    aiActor.callMessages[0].content.length > 80
+                      ? `${aiActor.callMessages[0].content.substring(0, 80)}...`
+                      : aiActor.callMessages[0].content
+                  }`
                 : aiActor.emailMessages
                 ? `📧 ${aiActor.emailMessages[0].subject}`
                 : aiActor.content.length > 100
@@ -807,6 +848,25 @@ export function StimulusResponseChain({
                     </div>
                     <div className="space-y-3">
                       {aiActor.chatMessages.map(renderChatBubble)}
+                    </div>
+                  </div>
+                </div>
+              </TooltipProvider>
+            ) : aiActor.callMessages ? (
+              /* Render Voice Call Transcript if available */
+              <TooltipProvider>
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 max-h-96 overflow-y-auto">
+                  <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
+                      <div className="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center">
+                        <Phone className="w-3 h-3 text-indigo-600" />
+                      </div>
+                      <span className="text-sm font-medium text-gray-700">
+                        Transkrip Voice Call
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      {aiActor.callMessages.map(renderCallMessage)}
                     </div>
                   </div>
                 </div>

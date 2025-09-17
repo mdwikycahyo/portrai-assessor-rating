@@ -747,7 +747,117 @@ export const mockSimulations: SimulationData[] = [
           name: "Alex Rahman",
           role: "Senior Analyst",
           communicationType: "call",
-          content: "Voice call discussion about market analysis findings and strategic recommendations"
+          content: "Voice call discussion about market analysis findings and strategic recommendations",
+          callMessages: [
+            {
+              id: "call-1",
+              speaker: "Alex Rahman",
+              content: "Halo John! Terima kasih sudah bisa voice call. Saya sudah review analisis pasar Q4 yang Anda kirim tadi. Overall hasilnya impressive!",
+              timestamp: "15:50"
+            },
+            {
+              id: "call-2",
+              speaker: "John Doe",
+              content: "Halo Alex! Terima kasih atas feedback positifnya. Saya senang bisa diskusi lebih detail tentang findings-nya.",
+              timestamp: "15:50"
+            },
+            {
+              id: "call-3",
+              speaker: "Alex Rahman",
+              content: "Ada beberapa insights yang menarik, terutama terkait competitive analysis dan technology trends. Bisa kita bahas lebih detail bagian competitive landscape-nya?",
+              timestamp: "15:51"
+            },
+            {
+              id: "call-4",
+              speaker: "John Doe",
+              content: "Tentu! Dari analisis yang saya lakukan, ada 3 kompetitor utama yang perlu diperhatikan. Pertama, TechCorp yang baru saja launch produk AI-powered solution. Kedua, InnovateLab dengan strategi pricing yang agresif. Dan ketiga, StartupX yang fokus pada niche market tapi growing rapidly.",
+              timestamp: "15:51"
+            },
+            {
+              id: "call-5",
+              speaker: "Alex Rahman",
+              content: "Menarik. Bagaimana impact dari technology trends yang Anda identify terhadap posisi kita di market?",
+              timestamp: "15:52"
+            },
+            {
+              id: "call-6",
+              speaker: "John Doe",
+              content: "Berdasarkan research, ada 2 major trends yang akan significantly impact market landscape. AI integration akan jadi table stakes dalam 18-24 bulan ke depan. Dan sustainability initiatives akan jadi key differentiator untuk customer decision making.",
+              timestamp: "15:53"
+            },
+            {
+              id: "call-7",
+              speaker: "Alex Rahman",
+              content: "Strategic recommendations-nya bagaimana untuk address trends ini?",
+              timestamp: "15:54"
+            },
+            {
+              id: "call-8",
+              speaker: "John Doe",
+              content: "Saya recommend 3 strategic actions. Pertama, accelerate AI capability development melalui partnership atau acquisition. Kedua, strengthen sustainability positioning dengan clear roadmap dan measurable targets. Ketiga, enhance customer experience dengan personalization yang leverage AI insights.",
+              timestamp: "15:54"
+            },
+            {
+              id: "call-9",
+              speaker: "Alex Rahman",
+              content: "Timeline untuk implementation recommendations ini realistic nggak menurut Anda?",
+              timestamp: "15:55"
+            },
+            {
+              id: "call-10",
+              speaker: "John Doe",
+              content: "Untuk AI integration, saya estimate 12-15 bulan untuk MVP, 24 bulan untuk full implementation. Sustainability roadmap bisa kita launch dalam 6 bulan dengan quick wins, comprehensive program dalam 18 bulan. Customer experience enhancement bisa phased approach, 3-6 bulan untuk initial improvements.",
+              timestamp: "15:56"
+            },
+            {
+              id: "call-11",
+              speaker: "Alex Rahman",
+              content: "Budget estimation untuk initiatives ini sudah ada?",
+              timestamp: "15:57"
+            },
+            {
+              id: "call-12",
+              speaker: "John Doe",
+              content: "Rough estimation, AI development sekitar 15-20% dari annual R&D budget. Sustainability program 8-10% dari operational budget. Customer experience enhancement bisa leverage existing infrastructure, jadi estimated additional 5-7% dari marketing budget.",
+              timestamp: "15:58"
+            },
+            {
+              id: "call-13",
+              speaker: "Alex Rahman",
+              content: "Good analysis John. Satu hal lagi, alignment dengan company strategic direction bagaimana?",
+              timestamp: "15:59"
+            },
+            {
+              id: "call-14",
+              speaker: "John Doe",
+              content: "Semua recommendations ini aligned dengan our 3-year strategic plan, especially focus pada digital transformation dan market expansion. AI dan sustainability initiatives akan support core objectives untuk market leadership dan operational excellence.",
+              timestamp: "16:00"
+            },
+            {
+              id: "call-15",
+              speaker: "Alex Rahman",
+              content: "Perfect! Ini sangat comprehensive analysis. Saya akan forward findings ini ke leadership team untuk review lebih lanjut. Thanks untuk insightful discussion!",
+              timestamp: "16:01"
+            },
+            {
+              id: "call-16",
+              speaker: "John Doe",
+              content: "Sama-sama Alex! Senang bisa berbagi insights dan dapat feedback dari senior analyst perspective. Kalau ada follow-up questions, feel free to reach out.",
+              timestamp: "16:01"
+            },
+            {
+              id: "call-17",
+              speaker: "Alex Rahman",
+              content: "Will do! Good work on this, John. Have a great day!",
+              timestamp: "16:02"
+            },
+            {
+              id: "call-18",
+              speaker: "John Doe",
+              content: "Thank you Alex, you too!",
+              timestamp: "16:02"
+            }
+          ]
         },
         participantActions: [
           {
