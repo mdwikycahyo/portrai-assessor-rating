@@ -16,14 +16,7 @@ import {
   ChatMessage,
   EmailMessage,
   CallMessage,
-  HighlightedSegment,
 } from "../data/stimulus-response-types";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "./ui/tooltip";
 import { AttachmentModal } from "./AttachmentModal";
 import {
   getAttachmentContent,
@@ -62,154 +55,12 @@ export function StimulusResponseChain({
     setActiveAttachment(null);
   };
 
-  // Get all highlighted segments for a specific message
-  const getHighlightsForMessage = (messageId: string): HighlightedSegment[] => {
-    const highlights: HighlightedSegment[] = [];
-    identifiedBARS.forEach((bars) => {
-      if (bars.highlightedSegments) {
-        bars.highlightedSegments.forEach((segment) => {
-          if (segment.messageId === messageId) {
-            highlights.push({ ...segment, category: bars.category });
-          }
-        });
-      }
-    });
-    return highlights;
-  };
 
-  // Smart word boundary expansion
-  const expandToWordBoundaries = (
-    text: string,
-    startIndex: number,
-    endIndex: number
-  ) => {
-    // Find word boundary before start
-    let adjustedStart = startIndex;
-    while (adjustedStart > 0 && /\w/.test(text[adjustedStart - 1])) {
-      adjustedStart--;
-    }
 
-    // Find word boundary after end
-    let adjustedEnd = endIndex;
-    while (adjustedEnd < text.length && /\w/.test(text[adjustedEnd])) {
-      adjustedEnd++;
-    }
 
-    return { adjustedStart, adjustedEnd };
-  };
-
-  // Find text segments by content matching (more robust than fixed indices)
-  const findTextSegments = (text: string, targetText: string) => {
-    const segments = [];
-    let searchIndex = 0;
-
-    while (true) {
-      const foundIndex = text
-        .toLowerCase()
-        .indexOf(targetText.toLowerCase(), searchIndex);
-      if (foundIndex === -1) break;
-
-      const { adjustedStart, adjustedEnd } = expandToWordBoundaries(
-        text,
-        foundIndex,
-        foundIndex + targetText.length
-      );
-
-      segments.push({
-        startIndex: adjustedStart,
-        endIndex: adjustedEnd,
-        text: text.substring(adjustedStart, adjustedEnd),
-      });
-
-      searchIndex = foundIndex + targetText.length;
-    }
-
-    return segments;
-  };
-
-  // Render text with enhanced highlighted segments
-  const renderHighlightedText = (text: string, messageId: string) => {
-    const highlights = getHighlightsForMessage(messageId);
-
-    if (highlights.length === 0) {
-      return <span>{text}</span>;
-    }
-
-    // Convert highlights to smart segments using content matching
-    const smartHighlights = highlights
-      .map((highlight) => {
-        const segments = findTextSegments(text, highlight.text);
-        return segments.map((segment) => ({
-          ...segment,
-          category: highlight.category,
-          behaviorId:
-            identifiedBARS.find((b) =>
-              b.highlightedSegments?.some(
-                (s) => s.messageId === messageId && s.text === highlight.text
-              )
-            )?.behaviorId || "",
-          description:
-            identifiedBARS.find((b) =>
-              b.highlightedSegments?.some(
-                (s) => s.messageId === messageId && s.text === highlight.text
-              )
-            )?.description || "",
-        }));
-      })
-      .flat();
-
-    if (smartHighlights.length === 0) {
-      return <span>{text}</span>;
-    }
-
-    // Sort highlights by start index
-    const sortedHighlights = smartHighlights.sort(
-      (a, b) => a.startIndex - b.startIndex
-    );
-    const parts = [];
-    let lastIndex = 0;
-
-    sortedHighlights.forEach((highlight, index) => {
-      // Add text before highlight
-      if (highlight.startIndex > lastIndex) {
-        parts.push(
-          <span key={`text-${index}`}>
-            {text.substring(lastIndex, highlight.startIndex)}
-          </span>
-        );
-      }
-
-      // Simple highlighting with enhanced tooltip
-      const highlightClass =
-        highlight.category === "strength"
-          ? "bg-green-100 text-green-800 px-1 rounded cursor-pointer"
-          : highlight.category === "meet-requirement"
-          ? "bg-yellow-100 text-yellow-800 px-1 rounded cursor-pointer"
-          : "bg-red-100 text-red-800 px-1 rounded cursor-pointer";
-
-      parts.push(
-        <Tooltip key={`highlight-${index}`}>
-          <TooltipTrigger asChild>
-            <span className={highlightClass}>{highlight.text}</span>
-          </TooltipTrigger>
-          <TooltipContent side="top" className="max-w-xs">
-            <div className="text-xs">
-              <div className="font-medium mb-1">BARS Behavior:</div>
-              <div>{highlight.description}</div>
-            </div>
-          </TooltipContent>
-        </Tooltip>
-      );
-
-      lastIndex = highlight.endIndex;
-    });
-
-    // Add remaining text
-    if (lastIndex < text.length) {
-      parts.push(<span key="text-end">{text.substring(lastIndex)}</span>);
-    }
-
-    return <>{parts}</>;
+  // Render plain text without highlighting
+  const renderPlainText = (text: string) => {
+    return <span>{text}</span>;
   };
 
   // Get BARS category color
@@ -322,7 +173,7 @@ export function StimulusResponseChain({
           } ${isDocumentLink ? "border-blue-300 bg-blue-50" : ""}`}
         >
           <div className="text-sm leading-relaxed whitespace-pre-line">
-            {renderHighlightedText(message.content, message.id)}
+            {renderPlainText(message.content)}
           </div>
           <div
             className={`text-xs mt-2 ${
@@ -393,7 +244,7 @@ export function StimulusResponseChain({
         {/* Email Body */}
         <div className="bg-white p-4 rounded-b-lg border-l border-r border-b border-gray-200">
           <div className="text-sm leading-relaxed whitespace-pre-line text-gray-800">
-            {renderHighlightedText(email.content, email.id)}
+            {renderPlainText(email.content)}
           </div>
         </div>
       </div>
@@ -427,7 +278,7 @@ export function StimulusResponseChain({
           <div className={`text-sm leading-relaxed ${
             isParticipant ? "text-blue-900" : "text-gray-800"
           }`}>
-            {renderHighlightedText(callMessage.content, callMessage.id)}
+            {renderPlainText(callMessage.content)}
           </div>
         </div>
       </div>
@@ -465,56 +316,15 @@ export function StimulusResponseChain({
           {/* Document Body */}
           <div className="p-6 space-y-4">
             <div className="prose prose-sm max-w-none">
-              {/* Enhanced document sections with BARS-aligned highlighting */}
+              {/* Document sections without highlighting */}
               {documentContent.includes("Executive Summary") && (
                 <div className="mb-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-3">
                     Executive Summary
                   </h3>
                   <p className="text-gray-700 text-sm leading-relaxed">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="bg-green-100 text-green-800 px-1 rounded">
-                            Analisis komprehensif industri teknologi Q4 2024
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="max-w-xs">
-                          <div className="text-xs">
-                            <div className="font-medium mb-1">
-                              BARS Evidence:
-                            </div>
-                            <div>
-                              Menunjukkan perhatian terhadap detail dan kualitas
-                              output
-                            </div>
-                          </div>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>{" "}
-                    menunjukkan pertumbuhan signifikan dengan fokus pada AI dan
-                    automation sebagai{" "}
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="bg-green-100 text-green-800 px-1 rounded">
-                            driver utama transformasi digital
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="max-w-xs">
-                          <div className="text-xs">
-                            <div className="font-medium mb-1">
-                              BARS Evidence:
-                            </div>
-                            <div>
-                              Memproses informasi dari berbagai sumber dengan
-                              efektif
-                            </div>
-                          </div>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                    . Rekomendasi strategis disusun berdasarkan analisis data
+                    Analisis komprehensif industri teknologi Q4 2024 menunjukkan pertumbuhan signifikan dengan fokus pada AI dan
+                    automation sebagai driver utama transformasi digital. Rekomendasi strategis disusun berdasarkan analisis data
                     pasar terkini dan proyeksi tren teknologi ke depan.
                   </p>
                 </div>
@@ -526,50 +336,8 @@ export function StimulusResponseChain({
                     Market Overview
                   </h3>
                   <p className="text-gray-700 text-sm leading-relaxed">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="bg-green-100 text-green-800 px-1 rounded">
-                            Data pasar Q4 menunjukkan adopsi teknologi AI
-                            meningkat 40%
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="max-w-xs">
-                          <div className="text-xs">
-                            <div className="font-medium mb-1">
-                              BARS Evidence:
-                            </div>
-                            <div>
-                              Memproses informasi dari berbagai sumber dengan
-                              efektif
-                            </div>
-                          </div>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>{" "}
-                    dibanding periode sebelumnya, dengan sektor enterprise
-                    memimpin implementasi.{" "}
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="bg-green-100 text-green-800 px-1 rounded">
-                            Analisis mendalam terhadap segmentasi pasar
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="max-w-xs">
-                          <div className="text-xs">
-                            <div className="font-medium mb-1">
-                              BARS Evidence:
-                            </div>
-                            <div>
-                              Menunjukkan perhatian terhadap detail dan kualitas
-                              output
-                            </div>
-                          </div>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>{" "}
-                    mengidentifikasi peluang growth di berbagai vertical
+                    Data pasar Q4 menunjukkan adopsi teknologi AI meningkat 40% dibanding periode sebelumnya, dengan sektor enterprise
+                    memimpin implementasi. Analisis mendalam terhadap segmentasi pasar mengidentifikasi peluang growth di berbagai vertical
                     industry.
                   </p>
                 </div>
@@ -581,49 +349,8 @@ export function StimulusResponseChain({
                     Technology Trends
                   </h3>
                   <p className="text-gray-700 text-sm leading-relaxed">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="bg-green-100 text-green-800 px-1 rounded">
-                            Fokus pada AI dan automation sebagai tren utama
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="max-w-xs">
-                          <div className="text-xs">
-                            <div className="font-medium mb-1">
-                              BARS Evidence:
-                            </div>
-                            <div>
-                              Memproses informasi dari berbagai sumber dengan
-                              efektif
-                            </div>
-                          </div>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                    , dengan emerging technologies seperti machine learning dan
-                    process automation mendominasi investasi perusahaan.{" "}
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="bg-green-100 text-green-800 px-1 rounded">
-                            Evaluasi komprehensif dampak teknologi
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="max-w-xs">
-                          <div className="text-xs">
-                            <div className="font-medium mb-1">
-                              BARS Evidence:
-                            </div>
-                            <div>
-                              Menunjukkan perhatian terhadap detail dan kualitas
-                              output
-                            </div>
-                          </div>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>{" "}
-                    terhadap produktivitas dan efisiensi operasional.
+                    Fokus pada AI dan automation sebagai tren utama, dengan emerging technologies seperti machine learning dan
+                    process automation mendominasi investasi perusahaan. Evaluasi komprehensif dampak teknologi terhadap produktivitas dan efisiensi operasional.
                   </p>
                 </div>
               )}
@@ -634,49 +361,8 @@ export function StimulusResponseChain({
                     Competitive Analysis
                   </h3>
                   <p className="text-gray-700 text-sm leading-relaxed">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="bg-green-100 text-green-800 px-1 rounded">
-                            Analisis pemain utama di industri teknologi
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="max-w-xs">
-                          <div className="text-xs">
-                            <div className="font-medium mb-1">
-                              BARS Evidence:
-                            </div>
-                            <div>
-                              Memproses informasi dari berbagai sumber dengan
-                              efektif
-                            </div>
-                          </div>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>{" "}
-                    menunjukkan konsolidasi market share di beberapa perusahaan
-                    besar dengan fokus inovasi AI.{" "}
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="bg-green-100 text-green-800 px-1 rounded">
-                            Pemetaan detail positioning kompetitor
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="max-w-xs">
-                          <div className="text-xs">
-                            <div className="font-medium mb-1">
-                              BARS Evidence:
-                            </div>
-                            <div>
-                              Menunjukkan perhatian terhadap detail dan kualitas
-                              output
-                            </div>
-                          </div>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>{" "}
-                    dan strategi differentiation yang digunakan.
+                    Analisis pemain utama di industri teknologi menunjukkan konsolidasi market share di beberapa perusahaan
+                    besar dengan fokus inovasi AI. Pemetaan detail positioning kompetitor dan strategi differentiation yang digunakan.
                   </p>
                 </div>
               )}
@@ -687,49 +373,8 @@ export function StimulusResponseChain({
                     Strategic Recommendations
                   </h3>
                   <p className="text-gray-700 text-sm leading-relaxed">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="bg-green-100 text-green-800 px-1 rounded">
-                            Strategi Q1 2025 berdasarkan analisis komprehensif
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="max-w-xs">
-                          <div className="text-xs">
-                            <div className="font-medium mb-1">
-                              BARS Evidence:
-                            </div>
-                            <div>
-                              Memproses informasi dari berbagai sumber dengan
-                              efektif
-                            </div>
-                          </div>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>{" "}
-                    meliputi investasi teknologi AI, partnership strategis, dan
-                    pengembangan capability internal.{" "}
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="bg-green-100 text-green-800 px-1 rounded">
-                            Rencana implementasi detail dengan timeline
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="max-w-xs">
-                          <div className="text-xs">
-                            <div className="font-medium mb-1">
-                              BARS Evidence:
-                            </div>
-                            <div>
-                              Menunjukkan perhatian terhadap detail dan kualitas
-                              output
-                            </div>
-                          </div>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>{" "}
-                    dan KPI measurement untuk mendukung transformasi digital.
+                    Strategi Q1 2025 berdasarkan analisis komprehensif meliputi investasi teknologi AI, partnership strategis, dan
+                    pengembangan capability internal. Rencana implementasi detail dengan timeline dan KPI measurement untuk mendukung transformasi digital.
                   </p>
                 </div>
               )}
@@ -835,61 +480,55 @@ export function StimulusResponseChain({
 
             {/* Render Chat Thread if available */}
             {aiActor.chatMessages ? (
-              <TooltipProvider>
-                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 max-h-96 overflow-y-auto">
-                  <div className="bg-white rounded-lg p-4 shadow-sm">
-                    <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
-                      <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center">
-                        <MessageSquare className="w-3 h-3 text-purple-600" />
-                      </div>
-                      <span className="text-sm font-medium text-gray-700">
-                        Detail Percakapan
-                      </span>
+              <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 max-h-96 overflow-y-auto">
+                <div className="bg-white rounded-lg p-4 shadow-sm">
+                  <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
+                    <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center">
+                      <MessageSquare className="w-3 h-3 text-purple-600" />
                     </div>
-                    <div className="space-y-3">
-                      {aiActor.chatMessages.map(renderChatBubble)}
-                    </div>
+                    <span className="text-sm font-medium text-gray-700">
+                      Detail Percakapan
+                    </span>
+                  </div>
+                  <div className="space-y-3">
+                    {aiActor.chatMessages.map(renderChatBubble)}
                   </div>
                 </div>
-              </TooltipProvider>
+              </div>
             ) : aiActor.callMessages ? (
               /* Render Voice Call Transcript if available */
-              <TooltipProvider>
-                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 max-h-96 overflow-y-auto">
-                  <div className="bg-white rounded-lg p-4 shadow-sm">
-                    <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
-                      <div className="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center">
-                        <Phone className="w-3 h-3 text-indigo-600" />
-                      </div>
-                      <span className="text-sm font-medium text-gray-700">
-                        Transkrip Voice Call
-                      </span>
+              <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 max-h-96 overflow-y-auto">
+                <div className="bg-white rounded-lg p-4 shadow-sm">
+                  <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
+                    <div className="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center">
+                      <Phone className="w-3 h-3 text-indigo-600" />
                     </div>
-                    <div className="space-y-2">
-                      {aiActor.callMessages.map(renderCallMessage)}
-                    </div>
+                    <span className="text-sm font-medium text-gray-700">
+                      Transkrip Voice Call
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    {aiActor.callMessages.map(renderCallMessage)}
                   </div>
                 </div>
-              </TooltipProvider>
+              </div>
             ) : aiActor.emailMessages ? (
               /* Render Email Thread if available */
-              <TooltipProvider>
-                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 max-h-96 overflow-y-auto">
-                  <div className="bg-white rounded-lg p-4 shadow-sm">
-                    <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
-                      <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-                        <Mail className="w-3 h-3 text-blue-600" />
-                      </div>
-                      <span className="text-sm font-medium text-gray-700">
-                        Detail Thread Email
-                      </span>
+              <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 max-h-96 overflow-y-auto">
+                <div className="bg-white rounded-lg p-4 shadow-sm">
+                  <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
+                    <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                      <Mail className="w-3 h-3 text-blue-600" />
                     </div>
-                    <div className="space-y-0">
-                      {aiActor.emailMessages.map(renderEmailMessage)}
-                    </div>
+                    <span className="text-sm font-medium text-gray-700">
+                      Detail Thread Email
+                    </span>
+                  </div>
+                  <div className="space-y-0">
+                    {aiActor.emailMessages.map(renderEmailMessage)}
                   </div>
                 </div>
-              </TooltipProvider>
+              </div>
             ) : communicationMedium.type !== "document" ? (
               /* Fallback to single stimulus display */
               <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
