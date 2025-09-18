@@ -3,19 +3,29 @@
 import { User, Building, Calendar, Clock, UserCheck } from "lucide-react"
 import { Participant } from "../data/mock-participants"
 import { SimulationData } from "../data/stimulus-response-types"
+import { AssessmentProgressIndicator } from "./AssessmentProgressIndicator"
 
 interface ParticipantSimulationHeaderProps {
   participant: Participant
   simulations: SimulationData[]
   activeSimulationId: string
   onTabChange: (simulationId: string) => void
+  activeView?: 'simulation' | 'key-action-rating'
+  onViewChange?: (view: 'simulation' | 'key-action-rating') => void
+  progressData?: {
+    completed: number
+    total: number
+  }
 }
 
 export function ParticipantSimulationHeader({
   participant,
   simulations,
   activeSimulationId,
-  onTabChange
+  onTabChange,
+  activeView = 'simulation',
+  onViewChange,
+  progressData
 }: ParticipantSimulationHeaderProps) {
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-4 mb-4 shadow-sm">
@@ -70,25 +80,45 @@ export function ParticipantSimulationHeader({
         </div>
       </div>
 
-      {/* Bottom Row: Minimalist Simulation Tabs */}
-      <div className="flex items-center gap-2">
-        {simulations.map((simulation) => {
-          const isActive = simulation.id === activeSimulationId
+      {/* Bottom Row: Navigation Tabs */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {/* Simulation Tabs - Always show */}
+          {simulations.map((simulation) => {
+            const isActive = simulation.id === activeSimulationId && activeView === 'simulation'
 
-          return (
-            <button
-              key={simulation.id}
-              onClick={() => onTabChange(simulation.id)}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                isActive
-                  ? "bg-blue-100 text-blue-800"
-                  : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
-              }`}
-            >
-              {simulation.name}
-            </button>
-          )
-        })}
+            return (
+              <button
+                key={simulation.id}
+                onClick={() => {
+                  onTabChange(simulation.id)
+                  if (onViewChange) onViewChange('simulation')
+                }}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  isActive
+                    ? "bg-blue-100 text-blue-800"
+                    : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
+                }`}
+              >
+                {simulation.name}
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Right side: Key Action Rating Button */}
+        {onViewChange && (
+          <button
+            onClick={() => onViewChange('key-action-rating')}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              activeView === 'key-action-rating'
+                ? "bg-blue-600 text-white"
+                : "text-blue-600 hover:text-blue-700 hover:bg-blue-50 border border-blue-200"
+            }`}
+          >
+            Key Action Rating
+          </button>
+        )}
       </div>
     </div>
   )
